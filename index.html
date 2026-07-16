@@ -1,9 +1,30 @@
+
+
+Discord bot builder · HTML
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Discord Bot Builder</title>
+<meta name="description" content="Build a working Discord bot by tapping together triggers and actions — no coding required. Generates real discord.js code and walks you through getting it live on your server." />
+<meta name="theme-color" content="#1e1f22" />
+ 
+<!--
+  FAVICON — drop a favicon file next to this HTML file (same folder) and point
+  the href at it. A 32x32 or 64x64 .png works everywhere; .ico and .svg are
+  also fine. apple-touch-icon is used when someone adds this page to their
+  iPhone/iPad home screen — ideally at least 180x180px.
+-->
+<link rel="icon" type="image/png" href="favicon.png" />
+<link rel="apple-touch-icon" href="favicon.png" />
+ 
+<!-- Social share preview (Discord, Twitter/X, Slack, etc. read these when the link is pasted) -->
+<meta property="og:title" content="Discord Bot Builder" />
+<meta property="og:description" content="Build a working Discord bot by tapping together triggers and actions — no coding required." />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary" />
+ 
 <!--
   GOOGLE ADSENSE — replace ca-pub-XXXXXXXXXXXXXXXX below with your own AdSense
   publisher ID (find it in your AdSense account under Account > Account information).
@@ -36,7 +57,7 @@
     font-family: var(--font);
     -webkit-font-smoothing: antialiased;
   }
-
+ 
   /* full-window page shell: top banner / (left rail + app + right rail) / bottom banner */
   .page-shell { min-height: 100vh; display: flex; flex-direction: column; }
   .main-row { flex: 1; width: 100%; display: flex; justify-content: center; align-items: stretch; gap: 16px; padding: 0 16px; }
@@ -49,7 +70,7 @@
     display: flex;
     flex-direction: column;
   }
-
+ 
   /* ad slots */
   .ad-rail { width: 160px; flex-shrink: 0; display: none; }
   @media (min-width: 1180px) { .ad-rail { display: block; } }
@@ -67,35 +88,35 @@
   a { text-decoration: none; }
   p { margin: 0 0 8px; }
   code { font-family: var(--mono); }
-
+ 
   /* server rail */
   .server-rail { display: flex; gap: 8px; padding: 10px 12px; background: var(--bg-deep); overflow-x: auto; }
   .server-icon { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; background: var(--bg-side); opacity: .4; }
   .server-icon.active { border-radius: 14px; background: var(--blurple); opacity: 1; }
-
+ 
   /* header */
   .header { padding: 12px 16px 8px; background: var(--bg-deep); border-bottom: 1px solid var(--border); }
   .header-row { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
   .bot-name-input { flex: 1; min-width: 0; background: transparent; border: none; outline: none; color: var(--text); font-size: 18px; font-weight: 700; font-family: var(--font); }
   .badge { font-size: 11px; padding: 4px 9px; border-radius: 999px; flex-shrink: 0; font-weight: 600; }
   .badge-green { background: rgba(35,165,89,.18); color: var(--green); }
-
+ 
   .tabs { display: flex; gap: 4px; overflow-x: auto; }
   .tab-btn { display: flex; align-items: center; gap: 6px; padding: 7px 12px; border-radius: 8px; font-size: 13px; font-weight: 600; border: none; background: transparent; color: var(--text-muted); flex-shrink: 0; white-space: nowrap; }
   .tab-btn.active { background: var(--blurple); color: #fff; }
   .tab-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--yellow); display: inline-block; margin-left: 2px; }
-
+ 
   .content { flex: 1; padding: 12px; padding-bottom: 40px; }
-
+ 
   /* generic cards */
   .card { border-radius: 12px; border: 1px solid var(--border); background: var(--bg-side); overflow: hidden; margin-bottom: 10px; }
-
+ 
   .event-card { border-radius: 12px; overflow: hidden; margin-bottom: 12px; border: 1px solid; }
   .event-card-head { display: flex; gap: 8px; align-items: flex-start; padding: 10px 12px; border-left: 4px solid; }
   .event-card-title { font-size: 14px; font-weight: 700; color: var(--text); }
   .event-card-desc { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
   .event-card-body { padding: 12px; display: flex; flex-direction: column; gap: 10px; }
-
+ 
   .block-card { border-radius: 12px; border: 1px solid var(--border); background: var(--bg-side); overflow: hidden; margin-bottom: 8px; }
   .block-card-head { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-left: 4px solid; }
   .block-card-title { flex: 1; font-size: 14px; font-weight: 600; color: var(--text); }
@@ -103,7 +124,7 @@
   .icon-btn:disabled { opacity: .25; }
   .icon-btn:not(:disabled):hover { background: rgba(255,255,255,.08); }
   .block-card-body { padding: 4px 12px 12px; display: flex; flex-direction: column; gap: 10px; }
-
+ 
   .field-label { display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .03em; color: var(--text-muted); margin-bottom: 4px; }
   .field-input { width: 100%; border-radius: 8px; padding: 8px 10px; font-size: 14px; background: var(--bg-deep); color: var(--text); border: 1px solid var(--border); font-family: var(--font); outline: none; }
   .field-input:focus { border-color: var(--blurple); }
@@ -113,7 +134,7 @@
   .color-row { display: flex; align-items: center; gap: 8px; }
   .color-row input[type=color] { width: 40px; height: 34px; border-radius: 6px; border: 1px solid var(--border); background: transparent; padding: 2px; }
   .color-row span { font-size: 12px; color: var(--text-muted); }
-
+ 
   .btn { display: flex; align-items: center; justify-content: center; gap: 6px; border: none; border-radius: 10px; font-size: 14px; font-weight: 600; padding: 10px 14px; }
   .btn-primary { background: var(--blurple); color: #fff; }
   .btn-primary:hover { background: var(--blurple-hover); }
@@ -123,11 +144,11 @@
   .btn-block { width: 100%; }
   .btn-copied { background: var(--green) !important; color: #fff !important; border-color: var(--green) !important; }
   .btn-danger-link { display: flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 600; color: var(--red); background: none; border: none; }
-
+ 
   .chip-row { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 6px; }
   .chip { display: flex; align-items: center; gap: 6px; padding: 8px 12px; border-radius: 8px; font-size: 12px; font-weight: 600; flex-shrink: 0; border: 1px solid var(--border); background: var(--bg-side); color: var(--text-normal); white-space: nowrap; }
   .chip-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--yellow); flex-shrink: 0; }
-
+ 
   .preview { border-radius: 10px; padding: 12px; display: flex; gap: 10px; background: var(--bg); }
   .preview-avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--blurple); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
   .preview-name-row { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
@@ -140,10 +161,10 @@
   .preview-embed-desc { font-size: 14px; color: var(--text-normal); margin: 6px 0 0; white-space: pre-wrap; }
   .preview-embed-footer { font-size: 11px; color: var(--text-muted); margin: 8px 0 0; }
   .preview-embed-image { margin-top: 8px; border-radius: 4px; background: var(--bg-deep); color: var(--text-dim); font-size: 11px; text-align: center; padding: 16px; }
-
+ 
   .warning-banner { display: flex; gap: 8px; padding: 10px 12px; border-radius: 10px; background: rgba(240,178,50,.1); border: 1px solid rgba(240,178,50,.4); margin-bottom: 10px; }
   .warning-text { font-size: 12px; color: var(--text); line-height: 1.5; }
-
+ 
   .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.65); display: flex; align-items: flex-end; justify-content: center; z-index: 50; }
   .modal-sheet { width: 100%; max-width: 480px; max-height: 85vh; overflow-y: auto; background: var(--bg-side); border-radius: 16px 16px 0 0; padding: 16px; }
   @media (min-width: 640px) {
@@ -157,16 +178,16 @@
   .modal-item-desc { font-size: 12px; color: var(--text-muted); margin-top: 1px; }
   .category-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .03em; color: var(--text-muted); margin: 14px 0 6px; }
   .category-label:first-of-type { margin-top: 0; }
-
+ 
   .icon-tag { width: 28px; height: 28px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-
+ 
   .code-block { border-radius: 12px; padding: 12px; font-family: var(--mono); font-size: 12px; white-space: pre; overflow: auto; background: var(--bg-deep); border: 1px solid var(--border); color: var(--text-normal); max-height: 65vh; margin: 0; }
-
+ 
   .file-card-head { display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; border-bottom: 1px solid var(--border); gap: 8px; flex-wrap: wrap; }
   .file-card-name { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; color: var(--text); }
   .file-actions { display: flex; gap: 8px; }
   .file-preview { padding: 12px; font-family: var(--mono); font-size: 12px; color: var(--text-muted); white-space: pre; overflow: auto; max-height: 160px; margin: 0; }
-
+ 
   .setup-step { border-radius: 12px; border: 1px solid var(--border); background: var(--bg-side); padding: 14px; margin-bottom: 10px; }
   .setup-step-head { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
   .setup-step-num { width: 24px; height: 24px; border-radius: 50%; background: var(--blurple); color: #fff; font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
@@ -183,14 +204,13 @@
   .perm-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-normal); }
   .invite-row { display: flex; gap: 8px; }
   .invite-btn { flex: 1; }
-
+ 
   .quickstart-card { border-radius: 12px; border: 1px solid var(--border); background: var(--bg-side); padding: 16px; margin-bottom: 12px; }
   .quickstart-head { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
   .quickstart-head span { font-size: 14px; font-weight: 700; color: var(--text); }
   .quickstart-desc { font-size: 12px; color: var(--text-muted); margin-bottom: 12px; }
-
+ 
   .empty-state { text-align: center; padding: 32px 12px; font-size: 14px; color: var(--text-muted); }
-  .footnote { font-size: 11px; color: var(--text-dim); text-align: center; padding: 6px 0 2px; }
 </style>
 </head>
 <body>
@@ -202,14 +222,14 @@
   not inside the app's tab content.
 -->
 <div class="page-shell">
-
+ 
   <!-- AD SLOT: top banner. Replace ca-pub-XXXXXXXXXXXXXXXX and data-ad-slot with your own AdSense values. -->
   <div class="ad-slot ad-slot-top">
     <div class="ad-label">Advertisement</div>
     <ins class="adsbygoogle" style="display:block;width:100%" data-ad-client="ca-pub-XXXXXXXXXXXXXXXX" data-ad-slot="1111111111" data-ad-format="auto" data-full-width-responsive="true"></ins>
     <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
   </div>
-
+ 
   <div class="main-row">
     <aside class="ad-rail">
       <!-- AD SLOT: left rail (desktop only, hidden under 1180px wide) -->
@@ -219,9 +239,9 @@
         <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
       </div>
     </aside>
-
+ 
     <div id="app"></div>
-
+ 
     <aside class="ad-rail">
       <!-- AD SLOT: right rail (desktop only, hidden under 1180px wide) -->
       <div class="ad-slot">
@@ -231,16 +251,16 @@
       </div>
     </aside>
   </div>
-
+ 
   <!-- AD SLOT: bottom banner -->
   <div class="ad-slot ad-slot-bottom">
     <div class="ad-label">Advertisement</div>
     <ins class="adsbygoogle" style="display:block;width:100%" data-ad-client="ca-pub-XXXXXXXXXXXXXXXX" data-ad-slot="4444444444" data-ad-format="auto" data-full-width-responsive="true"></ins>
     <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
   </div>
-
+ 
 </div>
-
+ 
 <script>
 /* ============================================================
    ICONS  (hand-drawn, Lucide-style stroke icons — no dependency)
@@ -290,21 +310,21 @@ function icon(name, size, color) {
   size = size || 16; color = color || 'currentColor';
   return '<span style="display:inline-flex;flex-shrink:0;width:' + size + 'px;height:' + size + 'px;color:' + color + '">' + (ICONS[name] || '') + '</span>';
 }
-
+ 
 const COLORS = { blurple: '#5865F2', green: '#23a559', red: '#da373c', yellow: '#f0b232', textMuted: '#949ba4' };
-
+ 
 function esc(s) {
   return String(s == null ? '' : s)
     .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
-
+ 
 let __idc = 0;
 function genId(p) {
   __idc += 1;
   return (p || 'id') + __idc + Math.random().toString(36).slice(2, 6);
 }
-
+ 
 /* ============================================================
    EVENT (TRIGGER) DEFINITIONS
    ============================================================ */
@@ -316,7 +336,7 @@ const EVENT_META = {
   guildMemberRemove: { hasMessage: false, hasMember: true, hasUser: true, hasReaction: false, canReply: false, canSame: false },
   messageReactionAdd: { hasMessage: false, hasMember: true, hasUser: true, hasReaction: true, canReply: false, canSame: true },
 };
-
+ 
 const EVENT_DEFS = {
   ready: {
     label: 'Bot Starts Up', icon: 'zap', color: COLORS.green,
@@ -377,7 +397,7 @@ const EVENT_DEFS = {
   },
 };
 const EVENT_ORDER = ['ready', 'messageCreate', 'slashCommand', 'guildMemberAdd', 'guildMemberRemove', 'messageReactionAdd'];
-
+ 
 /* ============================================================
    CONTEXT / VARIABLE-INTERPOLATION HELPERS
    ============================================================ */
@@ -397,7 +417,7 @@ function getRefs(eventType) {
       return {};
   }
 }
-
+ 
 function getVarMap(eventType, eventConfig, refs) {
   const map = {};
   if (refs.userRef) map.user = refs.userRef + '.username';
@@ -429,7 +449,7 @@ function getVarMap(eventType, eventConfig, refs) {
   }
   return map;
 }
-
+ 
 // Produces a JS template-literal STRING (including its own backticks) that,
 // when dropped into generated code, evaluates correctly at bot runtime.
 function interpolate(str, varMap) {
@@ -441,7 +461,7 @@ function interpolate(str, varMap) {
   });
   return '`' + escaped + '`';
 }
-
+ 
 function whoOptions(ctx) {
   const selfLabel = ctx.eventType === 'messageCreate' ? 'The person who sent the message'
     : ctx.eventType === 'slashCommand' ? 'The person who ran the command' : 'This member';
@@ -449,7 +469,7 @@ function whoOptions(ctx) {
   (ctx.userOptions || []).forEach(function (name) { opts.push(['option:' + name, 'Whoever is picked for "' + name + '"']); });
   return opts;
 }
-
+ 
 function memberActionLine(block, refs, eventType, actionExpr) {
   const who = block.config.targetWho || 'invoker';
   if (who.indexOf('option:') === 0 && eventType === 'slashCommand') {
@@ -459,7 +479,7 @@ function memberActionLine(block, refs, eventType, actionExpr) {
   const ref = refs.memberRef || 'null';
   return 'if (' + ref + ') { ' + actionExpr(ref) + ' }';
 }
-
+ 
 /* ============================================================
    ACTION (BLOCK) DEFINITIONS
    ============================================================ */
@@ -491,7 +511,7 @@ const ACTION_DEFS = {
       return [namedSend];
     },
   },
-
+ 
   sendEmbed: {
     label: 'Send an Embed', icon: 'layers', color: COLORS.blurple, category: 'Messages',
     allowed: function () { return true; },
@@ -532,7 +552,7 @@ const ACTION_DEFS = {
       return lines;
     },
   },
-
+ 
   sendDM: {
     label: 'Send a Direct Message', icon: 'message-circle', color: COLORS.blurple, category: 'Messages',
     allowed: function (ctx) { return ctx.hasUser; },
@@ -540,21 +560,21 @@ const ACTION_DEFS = {
     preview: 'message',
     gen: function (block, eventType, refs, varMap) { return ['await ' + refs.userRef + '.send(' + interpolate(block.config.text, varMap) + ').catch(() => {});']; },
   },
-
+ 
   deleteMessage: {
     label: 'Delete the Message', icon: 'trash', color: COLORS.red, category: 'Messages',
     allowed: function (ctx) { return ctx.hasMessage; },
     getFields: function () { return []; },
     gen: function () { return ['await message.delete().catch(() => {});']; },
   },
-
+ 
   addReaction: {
     label: 'React to the Message', icon: 'smile', color: COLORS.yellow, category: 'Messages',
     allowed: function (ctx) { return ctx.hasMessage; },
     getFields: function () { return [{ key: 'emoji', label: 'Emoji', type: 'text', default: '👍' }]; },
     gen: function (block) { return ['await message.react(' + JSON.stringify(block.config.emoji) + ').catch(() => {});']; },
   },
-
+ 
   addRole: {
     label: 'Give a Role', icon: 'user-plus', color: COLORS.green, category: 'Members',
     allowed: function (ctx) { return ctx.hasMember; },
@@ -570,7 +590,7 @@ const ACTION_DEFS = {
       })];
     },
   },
-
+ 
   removeRole: {
     label: 'Remove a Role', icon: 'user-minus', color: COLORS.red, category: 'Members',
     allowed: function (ctx) { return ctx.hasMember; },
@@ -586,7 +606,7 @@ const ACTION_DEFS = {
       })];
     },
   },
-
+ 
   kickMember: {
     label: 'Kick Member', icon: 'log-out', color: COLORS.red, category: 'Moderation',
     allowed: function (ctx) { return ctx.hasMember; },
@@ -600,7 +620,7 @@ const ACTION_DEFS = {
       return [memberActionLine(block, refs, eventType, function (ref) { return 'await ' + ref + '.kick(' + JSON.stringify(block.config.reason) + ').catch(() => {});'; })];
     },
   },
-
+ 
   banMember: {
     label: 'Ban Member', icon: 'ban', color: COLORS.red, category: 'Moderation',
     allowed: function (ctx) { return ctx.hasMember; },
@@ -614,7 +634,7 @@ const ACTION_DEFS = {
       return [memberActionLine(block, refs, eventType, function (ref) { return 'await ' + ref + '.ban({ reason: ' + JSON.stringify(block.config.reason) + ' }).catch(() => {});'; })];
     },
   },
-
+ 
   timeoutMember: {
     label: 'Timeout Member', icon: 'clock', color: COLORS.red, category: 'Moderation',
     allowed: function (ctx) { return ctx.hasMember; },
@@ -631,7 +651,7 @@ const ACTION_DEFS = {
       })];
     },
   },
-
+ 
   setVariable: {
     label: 'Set a Variable', icon: 'hash', color: COLORS.textMuted, category: 'Logic',
     allowed: function () { return true; },
@@ -649,21 +669,21 @@ const ACTION_DEFS = {
       return ['botVars[' + JSON.stringify(name) + '] = ' + interpolate(block.config.value, varMap) + ';'];
     },
   },
-
+ 
   wait: {
     label: 'Wait', icon: 'clock', color: COLORS.textMuted, category: 'Logic',
     allowed: function () { return true; },
     getFields: function () { return [{ key: 'seconds', label: 'Seconds to wait', type: 'number', default: 2 }]; },
     gen: function (block) { return ['await new Promise((resolve) => setTimeout(resolve, ' + (Number(block.config.seconds) || 1) + ' * 1000));']; },
   },
-
+ 
   log: {
     label: 'Log to Console', icon: 'terminal', color: COLORS.textMuted, category: 'Logic',
     allowed: function () { return true; },
     getFields: function () { return [{ key: 'text', label: 'Message to log', type: 'text', default: 'checkpoint reached' }]; },
     gen: function (block, eventType, refs, varMap) { return ['console.log(' + interpolate(block.config.text, varMap) + ');']; },
   },
-
+ 
   ifStart: {
     label: 'If…', icon: 'git-branch', color: COLORS.yellow, category: 'Logic',
     allowed: function () { return true; },
@@ -694,7 +714,7 @@ const ACTION_DEFS = {
       return ['if (' + expr + ') {'];
     },
   },
-
+ 
   elseBlock: { label: 'Otherwise…', icon: 'git-branch', color: COLORS.yellow, category: 'Logic', allowed: function () { return true; }, getFields: function () { return []; }, gen: function () { return ['} else {']; } },
   ifEnd: { label: 'End If', icon: 'git-branch', color: COLORS.yellow, category: 'Logic', allowed: function () { return true; }, getFields: function () { return []; }, gen: function () { return ['}']; } },
   repeatStart: {
@@ -705,9 +725,9 @@ const ACTION_DEFS = {
   },
   repeatEnd: { label: 'End Repeat', icon: 'repeat', color: COLORS.yellow, category: 'Logic', allowed: function () { return true; }, getFields: function () { return []; }, gen: function () { return ['}']; } },
 };
-
+ 
 const ACTION_CATEGORIES = ['Messages', 'Members', 'Moderation', 'Logic'];
-
+ 
 /* ============================================================
    CONTEXT BUILDER
    ============================================================ */
@@ -732,7 +752,7 @@ function ctxFor(script, variables) {
     variables: variables.map(function (v) { return v.name; }).filter(Boolean),
   };
 }
-
+ 
 /* ============================================================
    CODE GENERATION
    ============================================================ */
@@ -743,7 +763,7 @@ function generateScriptBody(script, variables) {
   let depth = 1;
   const lines = [];
   function push(s, d) { lines.push('  '.repeat(d === undefined ? depth : d) + s); }
-
+ 
   if (eventType === 'messageCreate') {
     if (script.event.config.ignoreBots !== false) push('if (message.author.bot) return;');
     const ft = script.event.config.filterType;
@@ -769,7 +789,7 @@ function generateScriptBody(script, variables) {
       push('if (!member) return;');
     }
   }
-
+ 
   script.blocks.forEach(function (block) {
     const def = ACTION_DEFS[block.type];
     if (!def) return;
@@ -779,10 +799,10 @@ function generateScriptBody(script, variables) {
     genLines.forEach(function (l) { push(l, lineDepth); });
     if (block.type === 'ifStart' || block.type === 'repeatStart') depth += 1;
   });
-
+ 
   return lines.join('\n');
 }
-
+ 
 function generateFullCode(scripts, variables, botName) {
   const intents = new Set(['GatewayIntentBits.Guilds']);
   const partialsNeeded = new Set();
@@ -799,11 +819,11 @@ function generateFullCode(scripts, variables, botName) {
     partialsNeeded.add('Partials.Message'); partialsNeeded.add('Partials.Reaction'); partialsNeeded.add('Partials.User');
   }
   if (needsGuildMembers) intents.add('GatewayIntentBits.GuildMembers');
-
+ 
   const slashScripts = scripts.filter(function (s) { return s.event.type === 'slashCommand'; });
   const otherScripts = scripts.filter(function (s) { return s.event.type !== 'slashCommand' && s.event.type !== 'ready'; });
   const readyScripts = scripts.filter(function (s) { return s.event.type === 'ready'; });
-
+ 
   const slashCommandsCode = slashScripts.map(function (s) {
     const c = s.event.config;
     const opts = [];
@@ -815,7 +835,7 @@ function generateFullCode(scripts, variables, botName) {
     });
     return '  { name: ' + JSON.stringify(c.commandName || 'command') + ', description: ' + JSON.stringify(c.description || 'A slash command') + ', options: [' + opts.join(', ') + '] }';
   }).join(',\n');
-
+ 
   const listenerBlocks = slashScripts.concat(otherScripts).map(function (s) {
     const evName = s.event.type === 'slashCommand' ? 'interactionCreate' : s.event.type;
     const body = generateScriptBody(s, variables);
@@ -826,14 +846,14 @@ function generateFullCode(scripts, variables, botName) {
       s.event.type === 'messageReactionAdd' ? 'reaction, user' : '';
     return 'client.on(' + JSON.stringify(evName) + ', async (' + params + ') => {\n' + body + '\n});';
   }).join('\n\n');
-
+ 
   const readyBody = readyScripts.length ? generateScriptBody(readyScripts[0], variables) : '';
   const varsInit = variables.filter(function (v) { return v.name; }).map(function (v) { return '  ' + JSON.stringify(v.name) + ': ' + JSON.stringify(v.value || ''); }).join(',\n');
   const readyLogLine = '  console.log(' + JSON.stringify('✅ ' + (botName || 'Bot') + ' is online as ') + ' + client.user.tag);';
   const cmdLogLine = '    console.log(' + JSON.stringify('📋 Registered ') + ' + slashCommands.length + ' + JSON.stringify(' slash command(s).') + ');';
   const intentsArr = Array.from(intents);
   const partialsArr = Array.from(partialsNeeded);
-
+ 
   return 'const { Client, GatewayIntentBits, Partials, EmbedBuilder, ApplicationCommandOptionType } = require(\'discord.js\');\n' +
 'require(\'dotenv\').config();\n\n' +
 '// Built with the Discord Bot Builder\n' +
@@ -865,7 +885,7 @@ listenerBlocks + '\n\n' +
 'client.on(\'error\', console.error);\n' +
 'client.login(process.env.DISCORD_TOKEN);\n';
 }
-
+ 
 function generatePackageJson(botName) {
   const safeName = (botName || 'my-discord-bot').toLowerCase().replace(/[^a-z0-9-]+/g, '-').replace(/^-+|-+$/g, '') || 'my-discord-bot';
   return JSON.stringify({
@@ -874,7 +894,7 @@ function generatePackageJson(botName) {
     dependencies: { 'discord.js': '^14.14.1', dotenv: '^16.4.5' },
   }, null, 2) + '\n';
 }
-
+ 
 function generateReadme(botName, scripts) {
   const triggers = scripts.map(function (s) {
     return '- **' + EVENT_DEFS[s.event.type].label + '** — ' + s.blocks.length + ' action' + (s.blocks.length === 1 ? '' : 's');
@@ -888,7 +908,7 @@ function generateReadme(botName, scripts) {
 '3. Run `npm start`\n\n' +
 'See the Setup tab in the builder for the full walkthrough, including how to create your bot on Discord and invite it to your server.\n';
 }
-
+ 
 const PERMS = [
   { key: 'base', bit: 1024 + 2048 + 65536, label: 'View Channels, Send Messages, Read Message History', always: true },
   { key: 'embed', bit: 16384, label: 'Embed Links', when: function (u) { return u.has('sendEmbed'); } },
@@ -899,7 +919,7 @@ const PERMS = [
   { key: 'ban', bit: 4, label: 'Ban Members', when: function (u) { return u.has('banMember'); } },
   { key: 'timeout', bit: 1099511627776, label: 'Moderate Members (timeout)', when: function (u) { return u.has('timeoutMember'); } },
 ];
-
+ 
 function computePermissions(scripts) {
   const used = new Set();
   scripts.forEach(function (s) {
@@ -914,7 +934,7 @@ function computePermissions(scripts) {
   });
   return { total: total, list: list };
 }
-
+ 
 function validateScript(script) {
   const warnings = [];
   let ifDepth = 0, repeatDepth = 0;
@@ -932,7 +952,7 @@ function validateScript(script) {
   }
   return warnings;
 }
-
+ 
 /* ============================================================
    TEMPLATES
    ============================================================ */
@@ -994,7 +1014,7 @@ const TEMPLATES = [
     },
   },
 ];
-
+ 
 /* ============================================================
    STATE
    ============================================================ */
@@ -1009,14 +1029,14 @@ const state = {
   varsOpen: false,
   clientId: '',
 };
-
+ 
 const TABS = [
   { id: 'build', label: 'Build', icon: 'wand' },
   { id: 'code', label: 'Code', icon: 'code' },
   { id: 'files', label: 'Files', icon: 'file-text' },
   { id: 'setup', label: 'Setup', icon: 'rocket' },
 ];
-
+ 
 /* ============================================================
    STATE MUTATIONS
    ============================================================ */
@@ -1078,7 +1098,7 @@ function closeAllModals() {
 function hasWarnings() {
   return state.scripts.some(function (s) { return validateScript(s).length > 0; });
 }
-
+ 
 /* ============================================================
    PREVIEW RENDERING
    ============================================================ */
@@ -1107,7 +1127,7 @@ function embedPreviewHTML(config, ctx) {
     '<span class="preview-app-badge">APP</span></div>' +
     '<div class="preview-embed-box" style="border-left-color:' + (config.color || '#5865F2') + '">' + title + desc + img + footer + '</div></div></div>';
 }
-
+ 
 /* ============================================================
    FIELD RENDERING
    ============================================================ */
@@ -1133,7 +1153,7 @@ function fieldHTML(field, value, dataAttrs) {
   }
   return '<div><label class="field-label">' + esc(field.label) + '</label>' + inputHTML + '</div>';
 }
-
+ 
 function eventCardHTML(script) {
   const def = EVENT_DEFS[script.event.type];
   const fields = def.fields().filter(function (f) { return !f.showIf || f.showIf(script.event.config); });
@@ -1146,7 +1166,7 @@ function eventCardHTML(script) {
     '<div><div class="event-card-title">' + esc(def.label) + '</div><div class="event-card-desc">' + esc(def.desc) + '</div></div></div>' +
     (fieldsHTML ? '<div class="event-card-body">' + fieldsHTML + '</div>' : '') + '</div>';
 }
-
+ 
 function blockCardHTML(script, block) {
   const def = ACTION_DEFS[block.type];
   if (!def) return '';
@@ -1166,12 +1186,12 @@ function blockCardHTML(script, block) {
     '<div class="block-card-head" style="border-left-color:' + def.color + '">' +
     icon(def.icon, 16, def.color) +
     '<span class="block-card-title">' + esc(def.label) + '</span>' +
-    '<button class="icon-btn" data-act="move-block" data-script="' + script.id + '" data-block="' + block.id + '" data-dir="-1" ' + (isFirst ? 'disabled' : '') + '>' + icon('chevron-up', 15) + '</button>' +
-    '<button class="icon-btn" data-act="move-block" data-script="' + script.id + '" data-block="' + block.id + '" data-dir="1" ' + (isLast ? 'disabled' : '') + '>' + icon('chevron-down', 15) + '</button>' +
-    '<button class="icon-btn" data-act="delete-block" data-script="' + script.id + '" data-block="' + block.id + '">' + icon('x', 15) + '</button>' +
+    '<button class="icon-btn" data-act="move-block" data-script="' + script.id + '" data-block="' + block.id + '" data-dir="-1" aria-label="Move action up" ' + (isFirst ? 'disabled' : '') + '>' + icon('chevron-up', 15) + '</button>' +
+    '<button class="icon-btn" data-act="move-block" data-script="' + script.id + '" data-block="' + block.id + '" data-dir="1" aria-label="Move action down" ' + (isLast ? 'disabled' : '') + '>' + icon('chevron-down', 15) + '</button>' +
+    '<button class="icon-btn" data-act="delete-block" data-script="' + script.id + '" data-block="' + block.id + '" aria-label="Delete this action">' + icon('x', 15) + '</button>' +
     '</div>' + (bodyInner ? '<div class="block-card-body">' + bodyInner + '</div>' : '') + '</div>';
 }
-
+ 
 /* ============================================================
    TAB RENDERING
    ============================================================ */
@@ -1188,7 +1208,7 @@ function buildTabHTML() {
       items + '</div>' +
       '<button class="btn btn-dashed btn-block" data-act="open-event-picker">' + icon('plus', 16) + ' Start from scratch</button>';
   }
-
+ 
   const chips = state.scripts.map(function (s) {
     const def = EVENT_DEFS[s.event.type];
     const active = s.id === state.selectedScriptId;
@@ -1197,7 +1217,7 @@ function buildTabHTML() {
     return '<button class="chip" data-act="select-script" data-id="' + s.id + '" style="' + style + '">' +
       icon(def.icon, 13, def.color) + ' ' + esc(def.label) + (warn ? '<span class="chip-dot"></span>' : '') + '</button>';
   }).join('');
-
+ 
   const script = state.scripts.filter(function (s) { return s.id === state.selectedScriptId; })[0];
   let selectedHTML = '<div class="empty-state">Select a trigger above, or add a new one.</div>';
   if (script) {
@@ -1214,12 +1234,12 @@ function buildTabHTML() {
       '<button class="btn btn-primary btn-block" style="margin-top:4px" data-act="open-picker">' + icon('plus', 16) + ' Add Action</button>' +
       '<button class="btn btn-secondary btn-block" style="margin-top:8px" data-act="open-vars">' + icon('hash', 14) + ' Variables (' + state.variables.length + ')</button>';
   }
-
+ 
   return '<div class="chip-row">' + chips +
     '<button class="chip" style="border-style:dashed;background:transparent;color:var(--text-muted)" data-act="open-event-picker">' + icon('plus', 13) + ' New trigger</button></div>' +
     selectedHTML;
 }
-
+ 
 function codeTabHTML() {
   const code = generateFullCode(state.scripts, state.variables, state.botName);
   const warnings = [];
@@ -1230,7 +1250,7 @@ function codeTabHTML() {
     '<button class="btn btn-secondary btn-sm" data-act="copy" data-copy="code">' + icon('copy', 13) + ' Copy</button></div>' +
     '<pre class="code-block">' + esc(code) + '</pre>';
 }
-
+ 
 function filesTabHTML() {
   const code = generateFullCode(state.scripts, state.variables, state.botName);
   const pkg = generatePackageJson(state.botName);
@@ -1250,13 +1270,13 @@ function filesTabHTML() {
       '<pre class="file-preview">' + esc(preview) + '</pre></div>';
   }).join('');
 }
-
+ 
 function stepHTML(n, iconName, title, bodyHTML) {
   return '<div class="setup-step"><div class="setup-step-head"><div class="setup-step-num">' + n + '</div>' +
     icon(iconName, 15, 'var(--text-muted)') + '<span class="setup-step-title">' + esc(title) + '</span></div>' +
     '<div class="setup-body">' + bodyHTML + '</div></div>';
 }
-
+ 
 function inviteAreaHTML(permInfo) {
   const cid = state.clientId.trim();
   if (!cid) return '<p style="font-size:12px;font-style:italic;color:var(--text-dim)">Paste your Application ID above to generate the link.</p>';
@@ -1264,7 +1284,7 @@ function inviteAreaHTML(permInfo) {
   return '<div class="invite-row"><a class="btn btn-primary invite-btn" href="' + esc(url) + '" target="_blank" rel="noopener noreferrer">Open Invite Link ' + icon('external-link', 13, '#fff') + '</a>' +
     '<button class="btn btn-secondary btn-sm" data-act="copy" data-copy="invite">' + icon('copy', 13) + ' Copy link</button></div>';
 }
-
+ 
 function setupTabHTML() {
   const needsMessageContent = state.scripts.some(function (s) { return s.event.type === 'messageCreate'; });
   const needsMembers = state.scripts.some(function (s) { return ['guildMemberAdd', 'guildMemberRemove'].indexOf(s.event.type) !== -1; }) ||
@@ -1276,12 +1296,12 @@ function setupTabHTML() {
   const intentsBlock = (needsMessageContent || needsMembers)
     ? '<ul>' + intentsList + '</ul>'
     : '<p style="font-style:italic;color:var(--text-dim)">Your current build doesn\'t need any privileged intents yet — you can skip this toggle for now and come back if you add message-reading or member-management features later.</p>';
-
+ 
   return stepHTML(1, 'bot', 'Create your bot application',
       '<p>Go to the Discord Developer Portal (sign in with your normal Discord account first if it asks). Click the <b>New Application</b> button in the top-right corner.</p>' +
       '<p>Type a name for your bot and accept the Developer Terms of Service, then click <b>Create</b>. The name you pick becomes your bot\'s default username in Discord — you can change it later, or add an icon, from the <b>General Information</b> page you land on.</p>' +
       '<a class="link" href="https://discord.com/developers/applications" target="_blank" rel="noopener noreferrer">discord.com/developers/applications ' + icon('external-link', 13) + '</a>') +
-
+ 
     stepHTML(2, 'key', 'Get your token &amp; turn on intents',
       '<p>In the left-hand sidebar of your application, click <b>Bot</b>.</p>' +
       '<ul>' +
@@ -1290,13 +1310,13 @@ function setupTabHTML() {
       '</ul>' +
       '<p>On that same Bot page, scroll down to <b>Privileged Gateway Intents</b> and turn on whichever of these your build uses:</p>' +
       intentsBlock) +
-
+ 
     stepHTML(3, 'link', 'Build your invite link',
       '<p>Go back to <b>General Information</b> at the top of the sidebar and copy the <b>Application ID</b> shown near the top of the page. Paste it below and we\'ll generate a link pre-loaded with exactly the permissions your bot needs — nothing more.</p>' +
-      '<input class="field-input" style="margin-bottom:8px" placeholder="Paste Application ID here" value="' + esc(state.clientId) + '" data-field="clientId" />' +
+      '<input class="field-input" style="margin-bottom:8px" placeholder="Paste Application ID here" aria-label="Discord Application ID" value="' + esc(state.clientId) + '" data-field="clientId" />' +
       '<div class="perm-list">' + permInfo.list.filter(function (p) { return p.on; }).map(function (p) { return '<div class="perm-item">' + icon('check', 12, 'var(--green)') + ' ' + esc(p.label) + '</div>'; }).join('') + '</div>' +
       '<div id="invite-area">' + inviteAreaHTML(permInfo) + '</div>') +
-
+ 
     stepHTML(4, 'users', 'Invite it to your server',
       '<p>Open the invite link from step 3 (you\'ll need the <b>Manage Server</b> permission on whichever server you\'re adding it to). Discord will ask you to:</p>' +
       '<ul>' +
@@ -1305,7 +1325,7 @@ function setupTabHTML() {
         '<li>Complete the captcha if you\'re asked for one.</li>' +
       '</ul>' +
       '<p>Check your server\'s member list — your bot now shows up there with a gray "offline" dot. That\'s expected; it turns online once you actually run its code in the next steps.</p>') +
-
+ 
     stepHTML(5, 'terminal', 'Set up the code on your computer',
       '<p><b>Install Node.js</b> — download the <b>LTS</b> version from the link below for your operating system and run the installer with the default options. To check it worked, open a terminal and type <code>node -v</code>; it should print something like <code>v20.11.0</code>.</p>' +
       '<a class="link" href="https://nodejs.org" target="_blank" rel="noopener noreferrer">nodejs.org ' + icon('external-link', 13) + '</a>' +
@@ -1317,7 +1337,7 @@ function setupTabHTML() {
       '<p>Once you\'re in the folder, install the bot\'s dependencies:</p>' +
       '<pre class="setup-pre">npm install</pre>' +
       '<p>This reads <code>package.json</code> and downloads the <code>discord.js</code> and <code>dotenv</code> packages into a new <code>node_modules</code> folder. It can take anywhere from a few seconds to a minute.</p>') +
-
+ 
     stepHTML(6, 'rocket', 'Run it',
       '<pre class="setup-pre">npm start</pre>' +
       '<p>Your terminal should print something like <b>"✅ &lt;your bot name&gt; is online as YourBot#1234"</b>, and your bot\'s status dot in Discord should flip from gray to green. Leave this terminal window open — closing it (or pressing Ctrl+C) stops the bot.</p>' +
@@ -1329,7 +1349,7 @@ function setupTabHTML() {
         '<li>Slash commands don\'t appear in Discord — give it a minute (guild commands can take a little time to show up) and fully restart your Discord app.</li>' +
         '<li>An action like kicking, banning, or role-assigning silently fails — check that you enabled the matching intent in step 2 and that your bot\'s role in Server Settings &gt; Roles is positioned <i>above</i> the roles it needs to manage.</li>' +
       '</ul>') +
-
+ 
     stepHTML(7, 'zap', 'Keep it running 24/7 (optional)',
       '<p>Right now your bot only stays online while <code>npm start</code> is running on your own computer — close the laptop and it goes offline. For a bot that\'s always available, you host the same three files on a service that keeps a Node.js process running around the clock instead of your own machine.</p>' +
       '<p>The general pattern, using a host like Railway or Render as an example:</p>' +
@@ -1339,13 +1359,13 @@ function setupTabHTML() {
         '<li>Set the start command to <code>npm start</code> (or <code>node index.js</code>) and deploy. The host installs your dependencies automatically and keeps the process alive, restarting it if it ever crashes.</li>' +
       '</ul>' +
       '<p>Free tiers on these hosts are usually enough for a small personal bot; busier bots may need a paid plan.</p>') +
-
+ 
     '<div class="feedback-card">' +
       '<p>Found a bug, or have an idea to make this builder better?</p>' +
       '<a class="btn btn-secondary" href="https://forms.gle/p2tzA4ghhE5sKxtL6" target="_blank" rel="noopener noreferrer">' + icon('external-link', 14) + ' Submit feedback</a>' +
     '</div>';
 }
-
+ 
 /* ============================================================
    MODALS
    ============================================================ */
@@ -1358,9 +1378,9 @@ function eventPickerModalHTML() {
   }).join('');
   return '<div class="modal-overlay" data-act="close-modal">' +
     '<div class="modal-sheet"><div class="modal-head"><span class="modal-title">Choose a trigger</span>' +
-    '<button class="icon-btn" data-act="close-modal">' + icon('x', 18) + '</button></div>' + items + '</div></div>';
+    '<button class="icon-btn" data-act="close-modal" aria-label="Close">' + icon('x', 18) + '</button></div>' + items + '</div></div>';
 }
-
+ 
 function blockPickerModalHTML() {
   const script = state.scripts.filter(function (s) { return s.id === state.selectedScriptId; })[0];
   if (!script) return '';
@@ -1378,27 +1398,27 @@ function blockPickerModalHTML() {
   }).join('');
   return '<div class="modal-overlay" data-act="close-modal">' +
     '<div class="modal-sheet"><div class="modal-head"><span class="modal-title">Add an action</span>' +
-    '<button class="icon-btn" data-act="close-modal">' + icon('x', 18) + '</button></div>' + sections + '</div></div>';
+    '<button class="icon-btn" data-act="close-modal" aria-label="Close">' + icon('x', 18) + '</button></div>' + sections + '</div></div>';
 }
-
+ 
 function variablesListHTML() {
   return state.variables.map(function (v) {
     return '<div style="display:flex;align-items:center;gap:8px;padding:8px;border-radius:8px;background:var(--bg-deep);border:1px solid var(--border);margin-bottom:8px">' +
       '<input value="' + esc(v.name) + '" placeholder="name" style="flex:1;min-width:0;background:transparent;border:none;color:var(--text);font-size:14px;outline:none" data-var-id="' + v.id + '" data-field-key="name" />' +
       '<input value="' + esc(v.value) + '" placeholder="starting value" style="flex:1;min-width:0;background:transparent;border:none;color:var(--text-muted);font-size:14px;outline:none" data-var-id="' + v.id + '" data-field-key="value" />' +
-      '<button class="icon-btn" data-act="delete-var" data-id="' + v.id + '">' + icon('x', 15) + '</button></div>';
+      '<button class="icon-btn" data-act="delete-var" data-id="' + v.id + '" aria-label="Delete this variable">' + icon('x', 15) + '</button></div>';
   }).join('');
 }
-
+ 
 function variablesModalHTML() {
   return '<div class="modal-overlay" data-act="close-modal">' +
     '<div class="modal-sheet"><div class="modal-head"><span class="modal-title">Variables</span>' +
-    '<button class="icon-btn" data-act="close-modal">' + icon('x', 18) + '</button></div>' +
+    '<button class="icon-btn" data-act="close-modal" aria-label="Close">' + icon('x', 18) + '</button></div>' +
     '<p style="font-size:12px;color:var(--text-muted);margin:0 0 12px">Variables let your bot remember things — like a counter — while it\'s running. Use them with "Set a Variable" and "If a variable equals…" blocks.</p>' +
     '<div id="vars-list">' + variablesListHTML() + '</div>' +
     '<button class="btn btn-primary btn-block" data-act="add-var" style="margin-top:8px">' + icon('plus', 15) + ' Add Variable</button></div></div>';
 }
-
+ 
 /* ============================================================
    HEADER + ROOT RENDER
    ============================================================ */
@@ -1410,10 +1430,10 @@ function headerHTML() {
   return '<div class="server-rail"><div class="server-icon active">' + icon('bot', 17, '#fff') + '</div>' +
     '<div class="server-icon">🎮</div><div class="server-icon">🎨</div><div class="server-icon">🎧</div><div class="server-icon">📚</div></div>' +
     '<div class="header"><div class="header-row">' + icon('hash', 18, 'var(--text-muted)') +
-    '<input class="bot-name-input" value="' + esc(state.botName) + '" data-field="botName" placeholder="Name your bot" />' +
+    '<input class="bot-name-input" value="' + esc(state.botName) + '" data-field="botName" placeholder="Name your bot" aria-label="Bot name" />' +
     '<span class="badge badge-green">Bot Builder</span></div><div class="tabs">' + tabs + '</div></div>';
 }
-
+ 
 function render() {
   const app = document.getElementById('app');
   let bodyHTML = '';
@@ -1421,16 +1441,15 @@ function render() {
   else if (state.activeTab === 'code') bodyHTML = codeTabHTML();
   else if (state.activeTab === 'files') bodyHTML = filesTabHTML();
   else if (state.activeTab === 'setup') bodyHTML = setupTabHTML();
-
+ 
   let modalsHTML = '';
   if (state.eventPickerOpen) modalsHTML += eventPickerModalHTML();
   if (state.pickerOpen) modalsHTML += blockPickerModalHTML();
   if (state.varsOpen) modalsHTML += variablesModalHTML();
-
-  app.innerHTML = headerHTML() + '<div class="content">' + bodyHTML + '</div>' + modalsHTML +
-    '<div class="footnote">Built with the Discord Bot Builder — a single-file HTML5 app, no build step required.</div>';
+ 
+  app.innerHTML = headerHTML() + '<div class="content">' + bodyHTML + '</div>' + modalsHTML;
 }
-
+ 
 /* ============================================================
    COPY / DOWNLOAD
    ============================================================ */
@@ -1447,7 +1466,7 @@ function copySourceText(which) {
   }
   return '';
 }
-
+ 
 async function copyToClipboard(text) {
   try {
     await navigator.clipboard.writeText(text);
@@ -1468,7 +1487,7 @@ async function copyToClipboard(text) {
     }
   }
 }
-
+ 
 function downloadText(filename, content) {
   const blob = new Blob([content], { type: 'text/plain' });
   const url = URL.createObjectURL(blob);
@@ -1477,7 +1496,7 @@ function downloadText(filename, content) {
   document.body.appendChild(a); a.click(); a.remove();
   URL.revokeObjectURL(url);
 }
-
+ 
 async function handleCopy(btn) {
   const text = copySourceText(btn.dataset.copy);
   if (!text) return;
@@ -1493,13 +1512,13 @@ function handleDownload(btn) {
   const text = copySourceText(btn.dataset.copy);
   downloadText(btn.dataset.file, text);
 }
-
+ 
 /* ============================================================
    FIELD CHANGE HANDLING
    ============================================================ */
 function applyFieldChange(el) {
   const value = el.type === 'checkbox' ? el.checked : el.value;
-
+ 
   if (el.dataset.varId) {
     const v = state.variables.filter(function (x) { return x.id === el.dataset.varId; })[0];
     if (v) v[el.dataset.fieldKey] = value;
@@ -1540,13 +1559,13 @@ function applyFieldChange(el) {
 function matchesField(el) {
   return el.hasAttribute('data-field') || el.hasAttribute('data-field-key');
 }
-
+ 
 /* ============================================================
    EVENT WIRING
    ============================================================ */
 function initEvents() {
   const app = document.getElementById('app');
-
+ 
   app.addEventListener('click', function (e) {
     if (e.target.classList && e.target.classList.contains('modal-overlay')) {
       closeAllModals(); render(); return;
@@ -1554,7 +1573,7 @@ function initEvents() {
     const btn = e.target.closest('[data-act]');
     if (!btn) return;
     const act = btn.dataset.act;
-
+ 
     if (act === 'tab') { state.activeTab = btn.dataset.tab; render(); }
     else if (act === 'open-event-picker') { state.eventPickerOpen = true; render(); }
     else if (act === 'open-picker') { state.pickerOpen = true; render(); }
@@ -1572,18 +1591,25 @@ function initEvents() {
     else if (act === 'copy') { handleCopy(btn); }
     else if (act === 'download') { handleDownload(btn); }
   });
-
+ 
   app.addEventListener('input', function (e) {
     if (matchesField(e.target)) applyFieldChange(e.target);
   });
-
+ 
   app.addEventListener('change', function (e) {
     if (matchesField(e.target)) { applyFieldChange(e.target); render(); }
   });
+ 
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && (state.eventPickerOpen || state.pickerOpen || state.varsOpen)) {
+      closeAllModals(); render();
+    }
+  });
 }
-
+ 
 render();
 initEvents();
 </script>
 </body>
 </html>
+ 
