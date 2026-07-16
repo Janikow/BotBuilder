@@ -1,0 +1,1589 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Discord Bot Builder</title>
+<!--
+  GOOGLE ADSENSE — replace ca-pub-XXXXXXXXXXXXXXXX below with your own AdSense
+  publisher ID (find it in your AdSense account under Account > Account information).
+  This loader only needs to be added once, here in <head>.
+-->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script>
+<style>
+  :root {
+    --bg: #313338;
+    --bg-deep: #1e1f22;
+    --bg-side: #2b2d31;
+    --border: #3f4248;
+    --blurple: #5865F2;
+    --blurple-hover: #4752C4;
+    --green: #23a559;
+    --red: #da373c;
+    --yellow: #f0b232;
+    --text: #f2f3f5;
+    --text-normal: #dbdee1;
+    --text-muted: #949ba4;
+    --text-dim: #6d6f78;
+    --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --mono: ui-monospace, Menlo, Consolas, "Courier New", monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--bg-deep);
+    color: var(--text-normal);
+    font-family: var(--font);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* full-window page shell: top banner / (left rail + app + right rail) / bottom banner */
+  .page-shell { min-height: 100vh; display: flex; flex-direction: column; }
+  .main-row { flex: 1; width: 100%; display: flex; justify-content: center; align-items: stretch; gap: 16px; padding: 0 16px; }
+  #app {
+    flex: 1 1 auto;
+    width: 100%;
+    max-width: 760px;
+    min-height: 100vh;
+    background: var(--bg);
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ad slots */
+  .ad-rail { width: 160px; flex-shrink: 0; display: none; }
+  @media (min-width: 1180px) { .ad-rail { display: block; } }
+  .ad-rail .ad-slot { position: sticky; top: 16px; }
+  .ad-slot {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    background: var(--bg-side); border: 1px dashed var(--border); border-radius: 10px;
+    padding: 10px; min-height: 90px; overflow: hidden;
+  }
+  .ad-slot-top, .ad-slot-bottom { width: 100%; max-width: 970px; margin: 12px auto; }
+  .ad-rail .ad-slot { min-height: 600px; width: 160px; }
+  .ad-label { font-size: 10px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 6px; }
+  .ins-fallback-hint { font-size: 11px; color: var(--text-dim); text-align: center; line-height: 1.5; }
+  button { font-family: var(--font); cursor: pointer; }
+  a { text-decoration: none; }
+  p { margin: 0 0 8px; }
+  code { font-family: var(--mono); }
+
+  /* server rail */
+  .server-rail { display: flex; gap: 8px; padding: 10px 12px; background: var(--bg-deep); overflow-x: auto; }
+  .server-icon { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; background: var(--bg-side); opacity: .4; }
+  .server-icon.active { border-radius: 14px; background: var(--blurple); opacity: 1; }
+
+  /* header */
+  .header { padding: 12px 16px 8px; background: var(--bg-deep); border-bottom: 1px solid var(--border); }
+  .header-row { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+  .bot-name-input { flex: 1; min-width: 0; background: transparent; border: none; outline: none; color: var(--text); font-size: 18px; font-weight: 700; font-family: var(--font); }
+  .badge { font-size: 11px; padding: 4px 9px; border-radius: 999px; flex-shrink: 0; font-weight: 600; }
+  .badge-green { background: rgba(35,165,89,.18); color: var(--green); }
+
+  .tabs { display: flex; gap: 4px; overflow-x: auto; }
+  .tab-btn { display: flex; align-items: center; gap: 6px; padding: 7px 12px; border-radius: 8px; font-size: 13px; font-weight: 600; border: none; background: transparent; color: var(--text-muted); flex-shrink: 0; white-space: nowrap; }
+  .tab-btn.active { background: var(--blurple); color: #fff; }
+  .tab-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--yellow); display: inline-block; margin-left: 2px; }
+
+  .content { flex: 1; padding: 12px; padding-bottom: 40px; }
+
+  /* generic cards */
+  .card { border-radius: 12px; border: 1px solid var(--border); background: var(--bg-side); overflow: hidden; margin-bottom: 10px; }
+
+  .event-card { border-radius: 12px; overflow: hidden; margin-bottom: 12px; border: 1px solid; }
+  .event-card-head { display: flex; gap: 8px; align-items: flex-start; padding: 10px 12px; border-left: 4px solid; }
+  .event-card-title { font-size: 14px; font-weight: 700; color: var(--text); }
+  .event-card-desc { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+  .event-card-body { padding: 12px; display: flex; flex-direction: column; gap: 10px; }
+
+  .block-card { border-radius: 12px; border: 1px solid var(--border); background: var(--bg-side); overflow: hidden; margin-bottom: 8px; }
+  .block-card-head { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-left: 4px solid; }
+  .block-card-title { flex: 1; font-size: 14px; font-weight: 600; color: var(--text); }
+  .icon-btn { background: none; border: none; padding: 5px; display: flex; color: var(--text-muted); border-radius: 6px; }
+  .icon-btn:disabled { opacity: .25; }
+  .icon-btn:not(:disabled):hover { background: rgba(255,255,255,.08); }
+  .block-card-body { padding: 4px 12px 12px; display: flex; flex-direction: column; gap: 10px; }
+
+  .field-label { display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .03em; color: var(--text-muted); margin-bottom: 4px; }
+  .field-input { width: 100%; border-radius: 8px; padding: 8px 10px; font-size: 14px; background: var(--bg-deep); color: var(--text); border: 1px solid var(--border); font-family: var(--font); outline: none; }
+  .field-input:focus { border-color: var(--blurple); }
+  textarea.field-input { resize: vertical; min-height: 64px; }
+  .checkbox-row { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--text-normal); cursor: pointer; padding: 3px 0; }
+  .checkbox-row input { width: 16px; height: 16px; accent-color: var(--blurple); flex-shrink: 0; }
+  .color-row { display: flex; align-items: center; gap: 8px; }
+  .color-row input[type=color] { width: 40px; height: 34px; border-radius: 6px; border: 1px solid var(--border); background: transparent; padding: 2px; }
+  .color-row span { font-size: 12px; color: var(--text-muted); }
+
+  .btn { display: flex; align-items: center; justify-content: center; gap: 6px; border: none; border-radius: 10px; font-size: 14px; font-weight: 600; padding: 10px 14px; }
+  .btn-primary { background: var(--blurple); color: #fff; }
+  .btn-primary:hover { background: var(--blurple-hover); }
+  .btn-secondary { background: var(--bg-side); border: 1px solid var(--border); color: var(--text-normal); }
+  .btn-dashed { background: transparent; border: 1px dashed var(--border); color: var(--text-muted); }
+  .btn-sm { padding: 6px 10px; font-size: 12px; border-radius: 8px; }
+  .btn-block { width: 100%; }
+  .btn-copied { background: var(--green) !important; color: #fff !important; border-color: var(--green) !important; }
+  .btn-danger-link { display: flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 600; color: var(--red); background: none; border: none; }
+
+  .chip-row { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 6px; }
+  .chip { display: flex; align-items: center; gap: 6px; padding: 8px 12px; border-radius: 8px; font-size: 12px; font-weight: 600; flex-shrink: 0; border: 1px solid var(--border); background: var(--bg-side); color: var(--text-normal); white-space: nowrap; }
+  .chip-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--yellow); flex-shrink: 0; }
+
+  .preview { border-radius: 10px; padding: 12px; display: flex; gap: 10px; background: var(--bg); }
+  .preview-avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--blurple); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .preview-name-row { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+  .preview-name { font-size: 14px; font-weight: 600; color: var(--text); }
+  .preview-app-badge { font-size: 9px; padding: 1px 4px; border-radius: 4px; background: var(--blurple); color: #fff; font-weight: 700; }
+  .preview-time { font-size: 11px; color: var(--text-muted); }
+  .preview-text { font-size: 14px; color: var(--text-normal); margin: 2px 0 0; white-space: pre-wrap; word-break: break-word; }
+  .preview-embed-box { border-radius: 6px; padding: 8px 12px; margin-top: 2px; border-left: 4px solid var(--blurple); background: var(--bg-side); }
+  .preview-embed-title { font-size: 14px; font-weight: 600; color: var(--text); margin: 0; }
+  .preview-embed-desc { font-size: 14px; color: var(--text-normal); margin: 6px 0 0; white-space: pre-wrap; }
+  .preview-embed-footer { font-size: 11px; color: var(--text-muted); margin: 8px 0 0; }
+  .preview-embed-image { margin-top: 8px; border-radius: 4px; background: var(--bg-deep); color: var(--text-dim); font-size: 11px; text-align: center; padding: 16px; }
+
+  .warning-banner { display: flex; gap: 8px; padding: 10px 12px; border-radius: 10px; background: rgba(240,178,50,.1); border: 1px solid rgba(240,178,50,.4); margin-bottom: 10px; }
+  .warning-text { font-size: 12px; color: var(--text); line-height: 1.5; }
+
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.65); display: flex; align-items: flex-end; justify-content: center; z-index: 50; }
+  .modal-sheet { width: 100%; max-width: 480px; max-height: 85vh; overflow-y: auto; background: var(--bg-side); border-radius: 16px 16px 0 0; padding: 16px; }
+  @media (min-width: 640px) {
+    .modal-overlay { align-items: center; }
+    .modal-sheet { border-radius: 16px; }
+  }
+  .modal-head { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+  .modal-title { font-size: 14px; font-weight: 700; color: var(--text); flex: 1; }
+  .modal-item { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 10px; background: var(--bg-deep); border: 1px solid var(--border); width: 100%; text-align: left; margin-bottom: 8px; }
+  .modal-item-title { font-size: 14px; font-weight: 600; color: var(--text); }
+  .modal-item-desc { font-size: 12px; color: var(--text-muted); margin-top: 1px; }
+  .category-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .03em; color: var(--text-muted); margin: 14px 0 6px; }
+  .category-label:first-of-type { margin-top: 0; }
+
+  .icon-tag { width: 28px; height: 28px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+
+  .code-block { border-radius: 12px; padding: 12px; font-family: var(--mono); font-size: 12px; white-space: pre; overflow: auto; background: var(--bg-deep); border: 1px solid var(--border); color: var(--text-normal); max-height: 65vh; margin: 0; }
+
+  .file-card-head { display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; border-bottom: 1px solid var(--border); gap: 8px; flex-wrap: wrap; }
+  .file-card-name { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; color: var(--text); }
+  .file-actions { display: flex; gap: 8px; }
+  .file-preview { padding: 12px; font-family: var(--mono); font-size: 12px; color: var(--text-muted); white-space: pre; overflow: auto; max-height: 160px; margin: 0; }
+
+  .setup-step { border-radius: 12px; border: 1px solid var(--border); background: var(--bg-side); padding: 14px; margin-bottom: 10px; }
+  .setup-step-head { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+  .setup-step-num { width: 24px; height: 24px; border-radius: 50%; background: var(--blurple); color: #fff; font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .setup-step-title { font-size: 14px; font-weight: 700; color: var(--text); }
+  .setup-body p { font-size: 14px; color: var(--text-normal); line-height: 1.55; }
+  .setup-body ul { margin: 0 0 8px; padding-left: 18px; }
+  .setup-body li { font-size: 14px; color: var(--text-normal); line-height: 1.55; margin-bottom: 4px; }
+  .setup-body .link { color: var(--blurple); font-weight: 600; display: inline-flex; align-items: center; gap: 5px; }
+  .setup-body code { color: var(--text); background: var(--bg-deep); padding: 1px 5px; border-radius: 4px; font-size: 12.5px; }
+  .feedback-card { border-radius: 12px; border: 1px solid var(--border); background: var(--bg-side); padding: 14px; margin-top: 4px; text-align: center; }
+  .feedback-card p { margin: 0 0 10px; }
+  .setup-pre { border-radius: 8px; padding: 8px 10px; font-family: var(--mono); font-size: 12.5px; color: var(--text-normal); background: var(--bg-deep); margin: 0 0 8px; overflow-x: auto; }
+  .perm-list { border-radius: 8px; padding: 10px; background: var(--bg-deep); border: 1px solid var(--border); margin-bottom: 8px; display: flex; flex-direction: column; gap: 5px; }
+  .perm-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-normal); }
+  .invite-row { display: flex; gap: 8px; }
+  .invite-btn { flex: 1; }
+
+  .quickstart-card { border-radius: 12px; border: 1px solid var(--border); background: var(--bg-side); padding: 16px; margin-bottom: 12px; }
+  .quickstart-head { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .quickstart-head span { font-size: 14px; font-weight: 700; color: var(--text); }
+  .quickstart-desc { font-size: 12px; color: var(--text-muted); margin-bottom: 12px; }
+
+  .empty-state { text-align: center; padding: 32px 12px; font-size: 14px; color: var(--text-muted); }
+  .footnote { font-size: 11px; color: var(--text-dim); text-align: center; padding: 6px 0 2px; }
+</style>
+</head>
+<body>
+<!--
+  All ad slots below live OUTSIDE #app on purpose. #app's contents are fully
+  rebuilt via JS (innerHTML) as you use the builder, and <script> tags never
+  execute when injected that way — so an ad unit placed inside #app would
+  silently never load. Add any further ad slots out here in the static shell,
+  not inside the app's tab content.
+-->
+<div class="page-shell">
+
+  <!-- AD SLOT: top banner. Replace ca-pub-XXXXXXXXXXXXXXXX and data-ad-slot with your own AdSense values. -->
+  <div class="ad-slot ad-slot-top">
+    <div class="ad-label">Advertisement</div>
+    <ins class="adsbygoogle" style="display:block;width:100%" data-ad-client="ca-pub-XXXXXXXXXXXXXXXX" data-ad-slot="1111111111" data-ad-format="auto" data-full-width-responsive="true"></ins>
+    <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+  </div>
+
+  <div class="main-row">
+    <aside class="ad-rail">
+      <!-- AD SLOT: left rail (desktop only, hidden under 1180px wide) -->
+      <div class="ad-slot">
+        <div class="ad-label">Advertisement</div>
+        <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXXXXXXXX" data-ad-slot="2222222222" data-ad-format="auto"></ins>
+        <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+      </div>
+    </aside>
+
+    <div id="app"></div>
+
+    <aside class="ad-rail">
+      <!-- AD SLOT: right rail (desktop only, hidden under 1180px wide) -->
+      <div class="ad-slot">
+        <div class="ad-label">Advertisement</div>
+        <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXXXXXXXX" data-ad-slot="3333333333" data-ad-format="auto"></ins>
+        <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+      </div>
+    </aside>
+  </div>
+
+  <!-- AD SLOT: bottom banner -->
+  <div class="ad-slot ad-slot-bottom">
+    <div class="ad-label">Advertisement</div>
+    <ins class="adsbygoogle" style="display:block;width:100%" data-ad-client="ca-pub-XXXXXXXXXXXXXXXX" data-ad-slot="4444444444" data-ad-format="auto" data-full-width-responsive="true"></ins>
+    <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+  </div>
+
+</div>
+
+<script>
+/* ============================================================
+   ICONS  (hand-drawn, Lucide-style stroke icons — no dependency)
+   ============================================================ */
+function svg(inner) {
+  return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="100%" height="100%">' + inner + '</svg>';
+}
+const ICONS = {
+  zap: svg('<path d="M13 2 4 14h6l-1 8 9-12h-6z"/>'),
+  'message-square': svg('<path d="M4 5h16v10H9l-4 4V5z"/>'),
+  terminal: svg('<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 9l3 3-3 3M13 15h4"/>'),
+  'user-plus': svg('<circle cx="9" cy="8" r="3"/><path d="M3 20c0-4 3-6 6-6s6 2 6 6"/><path d="M19 8v6M16 11h6"/>'),
+  'user-minus': svg('<circle cx="9" cy="8" r="3"/><path d="M3 20c0-4 3-6 6-6s6 2 6 6"/><path d="M16 11h6"/>'),
+  smile: svg('<circle cx="12" cy="12" r="9"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><path d="M9 9h.01M15 9h.01"/>'),
+  send: svg('<path d="M3 11l18-8-8 18-2-8-8-2z"/>'),
+  'message-circle': svg('<circle cx="12" cy="12" r="9"/><path d="M8 12h.01M12 12h.01M16 12h.01"/>'),
+  trash: svg('<path d="M4 6h16"/><path d="M9 6V4h6v2"/><path d="M6 6l1 14h10l1-14"/>'),
+  ban: svg('<circle cx="12" cy="12" r="9"/><path d="M6 6l12 12"/>'),
+  clock: svg('<circle cx="12" cy="12" r="9"/><path d="M12 7v5l4 2"/>'),
+  repeat: svg('<path d="M17 2l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 22l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/>'),
+  'git-branch': svg('<circle cx="6" cy="6" r="2.2"/><circle cx="6" cy="18" r="2.2"/><circle cx="18" cy="12" r="2.2"/><path d="M6 8.2V15.8"/><path d="M8.2 12H12a4 4 0 0 0 4-4v-.4"/>'),
+  hash: svg('<path d="M5 9h14M5 15h14M9 4L7 20M17 4l-2 16"/>'),
+  'chevron-up': svg('<path d="M6 15l6-6 6 6"/>'),
+  'chevron-down': svg('<path d="M6 9l6 6 6-6"/>'),
+  x: svg('<path d="M6 6l12 12M18 6L6 18"/>'),
+  plus: svg('<path d="M12 5v14M5 12h14"/>'),
+  rocket: svg('<path d="M12 2c3 1 5 4 5 8 0 3-2 6-5 9-3-3-5-6-5-9 0-4 2-7 5-8z"/><circle cx="12" cy="9" r="1.4" fill="currentColor" stroke="none"/><path d="M8 16l-3 5 5-2"/><path d="M16 16l3 5-5-2"/>'),
+  link: svg('<path d="M9 15l6-6"/><path d="M13 4h3a4 4 0 0 1 0 8h-2"/><path d="M11 20H8a4 4 0 0 1 0-8h2"/>'),
+  key: svg('<circle cx="8" cy="14" r="4"/><path d="M11 11l9-9"/><path d="M17 5l3 3"/><path d="M14 8l2 2"/>'),
+  'alert-triangle': svg('<path d="M12 3l10 18H2z"/><path d="M12 10v4"/><path d="M12 17h.01"/>'),
+  'external-link': svg('<path d="M9 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-4"/><path d="M14 4h6v6"/><path d="M20 4L11 13"/>'),
+  sparkles: svg('<path d="M12 3l1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5z"/><path d="M19 15l.7 2.1L22 18l-2.3.9L19 21l-.7-2.1L16 18l2.3-.9z"/>'),
+  code: svg('<path d="M8 6l-5 6 5 6"/><path d="M16 6l5 6-5 6"/>'),
+  layers: svg('<path d="M12 2l9 5-9 5-9-5 9-5z"/><path d="M3 12l9 5 9-5"/><path d="M3 17l9 5 9-5"/>'),
+  'log-out': svg('<path d="M9 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h4"/><path d="M15 8l4 4-4 4"/><path d="M19 12H9"/>'),
+  users: svg('<circle cx="8" cy="8" r="3"/><path d="M2 20c0-3.5 2.5-6 6-6s6 2.5 6 6"/><circle cx="17" cy="9" r="2.3"/><path d="M14.5 20c0-2.8 1.8-5 4.5-5"/>'),
+  'file-text': svg('<path d="M6 2h9l5 5v15H6z"/><path d="M15 2v5h5"/><path d="M9 13h6M9 17h6"/>'),
+  copy: svg('<rect x="9" y="9" width="12" height="12" rx="1"/><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/>'),
+  download: svg('<path d="M12 3v12M7 10l5 5 5-5"/><path d="M4 19h16"/>'),
+  check: svg('<path d="M5 12l5 5L20 7"/>'),
+  'chevron-right': svg('<path d="M9 6l6 6-6 6"/>'),
+  wand: svg('<path d="M5 19L19 5"/><path d="M15 3l1.5 1.5"/><path d="M19.5 7.5L21 9"/><path d="M3 15l1.5 1.5"/>'),
+  bot: svg('<rect x="5" y="9" width="14" height="10" rx="2"/><circle cx="9" cy="14" r="1.3" fill="currentColor" stroke="none"/><circle cx="15" cy="14" r="1.3" fill="currentColor" stroke="none"/><path d="M12 9V5"/><circle cx="12" cy="4" r="1.2" fill="currentColor" stroke="none"/><path d="M2 13h3M19 13h3"/>'),
+  party: svg('<path d="M4 20l3-9 9 3z"/><path d="M13 3l1 3M18 6l3 1M17 11l2 2"/>'),
+};
+function icon(name, size, color) {
+  size = size || 16; color = color || 'currentColor';
+  return '<span style="display:inline-flex;flex-shrink:0;width:' + size + 'px;height:' + size + 'px;color:' + color + '">' + (ICONS[name] || '') + '</span>';
+}
+
+const COLORS = { blurple: '#5865F2', green: '#23a559', red: '#da373c', yellow: '#f0b232', textMuted: '#949ba4' };
+
+function esc(s) {
+  return String(s == null ? '' : s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+let __idc = 0;
+function genId(p) {
+  __idc += 1;
+  return (p || 'id') + __idc + Math.random().toString(36).slice(2, 6);
+}
+
+/* ============================================================
+   EVENT (TRIGGER) DEFINITIONS
+   ============================================================ */
+const EVENT_META = {
+  ready: { hasMessage: false, hasMember: false, hasUser: false, hasReaction: false, canReply: false, canSame: false },
+  messageCreate: { hasMessage: true, hasMember: true, hasUser: true, hasReaction: false, canReply: true, canSame: true },
+  slashCommand: { hasMessage: false, hasMember: true, hasUser: true, hasReaction: false, canReply: true, canSame: false },
+  guildMemberAdd: { hasMessage: false, hasMember: true, hasUser: true, hasReaction: false, canReply: false, canSame: false },
+  guildMemberRemove: { hasMessage: false, hasMember: true, hasUser: true, hasReaction: false, canReply: false, canSame: false },
+  messageReactionAdd: { hasMessage: false, hasMember: true, hasUser: true, hasReaction: true, canReply: false, canSame: true },
+};
+
+const EVENT_DEFS = {
+  ready: {
+    label: 'Bot Starts Up', icon: 'zap', color: COLORS.green,
+    desc: 'Runs once, the moment your bot connects to Discord.',
+    fields: function () { return []; },
+  },
+  messageCreate: {
+    label: 'Message Received', icon: 'message-square', color: COLORS.blurple,
+    desc: 'Runs every time someone sends a message your bot can see.',
+    fields: function () {
+      return [
+        { key: 'filterType', label: 'Only run when the message…', type: 'select', default: 'any',
+          options: [['any', 'Is any message'], ['contains', 'Contains certain text'], ['equals', 'Exactly matches text'], ['startsWith', 'Starts with text']] },
+        { key: 'filterText', label: 'Text to match', type: 'text', default: 'good bot', placeholder: 'e.g. good bot',
+          showIf: function (c) { return c.filterType !== 'any'; } },
+        { key: 'ignoreBots', label: 'Ignore messages sent by other bots', type: 'checkbox', default: true },
+      ];
+    },
+  },
+  slashCommand: {
+    label: 'Slash Command Used', icon: 'terminal', color: COLORS.blurple,
+    desc: 'Runs when a member types your custom /command.',
+    fields: function () {
+      return [
+        { key: 'commandName', label: 'Command name', type: 'text', default: 'hello', placeholder: 'lowercase-no-spaces' },
+        { key: 'description', label: 'Shown under the command in Discord', type: 'text', default: 'Says hello back', placeholder: 'What does this command do?' },
+        { key: 'opt1Name', label: 'Option 1 name (leave blank for none)', type: 'text', default: '' },
+        { key: 'opt1Type', label: 'Option 1 type', type: 'select', default: 'string', showIf: function (c) { return !!c.opt1Name; },
+          options: [['string', 'Text'], ['integer', 'Whole number'], ['user', 'A server member']] },
+        { key: 'opt1Required', label: 'Option 1 is required', type: 'checkbox', default: false, showIf: function (c) { return !!c.opt1Name; } },
+        { key: 'opt2Name', label: 'Option 2 name (leave blank for none)', type: 'text', default: '' },
+        { key: 'opt2Type', label: 'Option 2 type', type: 'select', default: 'string', showIf: function (c) { return !!c.opt2Name; },
+          options: [['string', 'Text'], ['integer', 'Whole number'], ['user', 'A server member']] },
+        { key: 'opt2Required', label: 'Option 2 is required', type: 'checkbox', default: false, showIf: function (c) { return !!c.opt2Name; } },
+      ];
+    },
+  },
+  guildMemberAdd: {
+    label: 'Member Joins Server', icon: 'user-plus', color: COLORS.green,
+    desc: 'Runs the moment a new member joins.',
+    fields: function () { return []; },
+  },
+  guildMemberRemove: {
+    label: 'Member Leaves Server', icon: 'user-minus', color: COLORS.red,
+    desc: 'Runs when a member leaves or is removed.',
+    fields: function () { return []; },
+  },
+  messageReactionAdd: {
+    label: 'Reaction Added', icon: 'smile', color: COLORS.yellow,
+    desc: 'Runs when someone reacts to a message — great for reaction roles.',
+    fields: function () {
+      return [
+        { key: 'emojiFilter', label: 'Only react to', type: 'select', default: 'any',
+          options: [['any', 'Any emoji'], ['specific', 'One specific emoji']] },
+        { key: 'emoji', label: 'Emoji', type: 'text', default: '✅', placeholder: 'e.g. ✅', showIf: function (c) { return c.emojiFilter === 'specific'; } },
+      ];
+    },
+  },
+};
+const EVENT_ORDER = ['ready', 'messageCreate', 'slashCommand', 'guildMemberAdd', 'guildMemberRemove', 'messageReactionAdd'];
+
+/* ============================================================
+   CONTEXT / VARIABLE-INTERPOLATION HELPERS
+   ============================================================ */
+function getRefs(eventType) {
+  switch (eventType) {
+    case 'messageCreate':
+      return { userRef: 'message.author', memberRef: 'message.member', replyTarget: 'message', sameChannel: 'message.channel' };
+    case 'slashCommand':
+      return { userRef: 'interaction.user', memberRef: 'interaction.member', replyTarget: 'interaction', sameChannel: null };
+    case 'guildMemberAdd':
+      return { userRef: 'member.user', memberRef: 'member', replyTarget: null, sameChannel: null };
+    case 'guildMemberRemove':
+      return { userRef: 'member.user', memberRef: 'member', replyTarget: null, sameChannel: null };
+    case 'messageReactionAdd':
+      return { userRef: 'user', memberRef: 'member', replyTarget: null, sameChannel: 'reaction.message.channel' };
+    default:
+      return {};
+  }
+}
+
+function getVarMap(eventType, eventConfig, refs) {
+  const map = {};
+  if (refs.userRef) map.user = refs.userRef + '.username';
+  if (refs.memberRef || refs.userRef) map.mention = (refs.memberRef || refs.userRef) + '.toString()';
+  if (eventType === 'messageCreate') {
+    map.message = 'message.content';
+    map.channel = 'message.channel.name';
+    map.server = 'message.guild.name';
+  }
+  if (eventType === 'messageReactionAdd') {
+    map.emoji = 'reaction.emoji.name';
+    map.channel = 'reaction.message.channel.name';
+    map.server = 'reaction.message.guild.name';
+  }
+  if (eventType === 'slashCommand') {
+    map.channel = 'interaction.channel.name';
+    map.server = 'interaction.guild.name';
+    ['opt1', 'opt2'].forEach(function (k) {
+      const name = eventConfig[k + 'Name'];
+      if (name) {
+        const type = eventConfig[k + 'Type'] || 'string';
+        const getter = type === 'integer' ? 'getInteger' : type === 'user' ? 'getUser' : 'getString';
+        map['option:' + name] = 'interaction.options.' + getter + '(' + JSON.stringify(name) + ')';
+      }
+    });
+  }
+  if (eventType === 'guildMemberAdd' || eventType === 'guildMemberRemove') {
+    map.server = 'member.guild.name';
+  }
+  return map;
+}
+
+// Produces a JS template-literal STRING (including its own backticks) that,
+// when dropped into generated code, evaluates correctly at bot runtime.
+function interpolate(str, varMap) {
+  const raw = str == null ? '' : String(str);
+  let escaped = raw.replace(/\\/g, '\\\\').replace(/`/g, '\\`').replace(/\$\{/g, '\\${');
+  escaped = escaped.replace(/\{\{\s*([\w:]+)\s*\}\}/g, function (m, key) {
+    if (Object.prototype.hasOwnProperty.call(varMap, key)) return '${' + varMap[key] + '}';
+    return '';
+  });
+  return '`' + escaped + '`';
+}
+
+function whoOptions(ctx) {
+  const selfLabel = ctx.eventType === 'messageCreate' ? 'The person who sent the message'
+    : ctx.eventType === 'slashCommand' ? 'The person who ran the command' : 'This member';
+  const opts = [['invoker', selfLabel]];
+  (ctx.userOptions || []).forEach(function (name) { opts.push(['option:' + name, 'Whoever is picked for "' + name + '"']); });
+  return opts;
+}
+
+function memberActionLine(block, refs, eventType, actionExpr) {
+  const who = block.config.targetWho || 'invoker';
+  if (who.indexOf('option:') === 0 && eventType === 'slashCommand') {
+    const optName = who.slice(7);
+    return '{ const _pickedUser = interaction.options.getUser(' + JSON.stringify(optName) + '); const targetMember = _pickedUser ? await interaction.guild.members.fetch(_pickedUser.id).catch(() => null) : null; if (targetMember) { ' + actionExpr('targetMember') + ' } }';
+  }
+  const ref = refs.memberRef || 'null';
+  return 'if (' + ref + ') { ' + actionExpr(ref) + ' }';
+}
+
+/* ============================================================
+   ACTION (BLOCK) DEFINITIONS
+   ============================================================ */
+const ACTION_DEFS = {
+  sendMessage: {
+    label: 'Send a Message', icon: 'send', color: COLORS.blurple, category: 'Messages',
+    allowed: function () { return true; },
+    getFields: function (ctx) {
+      const opts = [];
+      if (ctx.canReply) opts.push(['reply', 'Reply directly to this']);
+      if (ctx.canSame) opts.push(['same', 'This channel']);
+      opts.push(['named', 'A specific channel by name']);
+      return [
+        { key: 'target', label: 'Send to', type: 'select', default: ctx.canReply ? 'reply' : ctx.canSame ? 'same' : 'named', options: opts },
+        { key: 'channelName', label: 'Channel name', type: 'text', default: 'general', placeholder: 'general', showIf: function (c) { return c.target === 'named'; } },
+        { key: 'text', label: 'Message text', type: 'textarea', default: 'Hello {{user}}!', placeholder: 'Type your message…' },
+      ];
+    },
+    preview: 'message',
+    gen: function (block, eventType, refs, varMap) {
+      const text = interpolate(block.config.text, varMap);
+      const target = block.config.target;
+      const namedSend = '{ const ch = client.channels.cache.find((c) => c.name === ' + JSON.stringify(block.config.channelName) + ' && c.isTextBased()); if (ch) await ch.send(' + text + '); }';
+      if (eventType === 'slashCommand') {
+        return target === 'reply' ? ['await interaction.reply(' + text + ');'] : [namedSend];
+      }
+      if (target === 'reply' && refs.replyTarget) return ['await ' + refs.replyTarget + '.reply(' + text + ');'];
+      if (target === 'same' && refs.sameChannel) return ['await ' + refs.sameChannel + '.send(' + text + ');'];
+      return [namedSend];
+    },
+  },
+
+  sendEmbed: {
+    label: 'Send an Embed', icon: 'layers', color: COLORS.blurple, category: 'Messages',
+    allowed: function () { return true; },
+    getFields: function (ctx) {
+      const opts = [];
+      if (ctx.canReply) opts.push(['reply', 'Reply directly to this']);
+      if (ctx.canSame) opts.push(['same', 'This channel']);
+      opts.push(['named', 'A specific channel by name']);
+      return [
+        { key: 'target', label: 'Send to', type: 'select', default: ctx.canReply ? 'reply' : ctx.canSame ? 'same' : 'named', options: opts },
+        { key: 'channelName', label: 'Channel name', type: 'text', default: 'general', showIf: function (c) { return c.target === 'named'; } },
+        { key: 'title', label: 'Embed title', type: 'text', default: 'Announcement' },
+        { key: 'description', label: 'Embed text', type: 'textarea', default: 'Something important happened, {{user}}!' },
+        { key: 'color', label: 'Accent color', type: 'color', default: '#5865F2' },
+        { key: 'imageUrl', label: 'Image URL (optional)', type: 'text', default: '' },
+        { key: 'footer', label: 'Footer text (optional)', type: 'text', default: '' },
+      ];
+    },
+    preview: 'embed',
+    gen: function (block, eventType, refs, varMap) {
+      const c = block.config;
+      const varName = 'embed_' + block.id;
+      const parts = ['new EmbedBuilder().setColor(' + JSON.stringify(c.color || '#5865F2') + ')'];
+      if (c.title) parts.push('.setTitle(' + interpolate(c.title, varMap) + ')');
+      if (c.description) parts.push('.setDescription(' + interpolate(c.description, varMap) + ')');
+      if (c.imageUrl) parts.push('.setImage(' + JSON.stringify(c.imageUrl) + ')');
+      if (c.footer) parts.push('.setFooter({ text: ' + interpolate(c.footer, varMap) + ' })');
+      const lines = ['const ' + varName + ' = ' + parts.join('') + ';'];
+      const payload = '{ embeds: [' + varName + '] }';
+      const namedSend = '{ const ch = client.channels.cache.find((c) => c.name === ' + JSON.stringify(c.channelName) + ' && c.isTextBased()); if (ch) await ch.send(' + payload + '); }';
+      if (eventType === 'slashCommand') {
+        lines.push(c.target === 'reply' ? 'await interaction.reply(' + payload + ');' : namedSend);
+        return lines;
+      }
+      if (c.target === 'reply' && refs.replyTarget) lines.push('await ' + refs.replyTarget + '.reply(' + payload + ');');
+      else if (c.target === 'same' && refs.sameChannel) lines.push('await ' + refs.sameChannel + '.send(' + payload + ');');
+      else lines.push(namedSend);
+      return lines;
+    },
+  },
+
+  sendDM: {
+    label: 'Send a Direct Message', icon: 'message-circle', color: COLORS.blurple, category: 'Messages',
+    allowed: function (ctx) { return ctx.hasUser; },
+    getFields: function () { return [{ key: 'text', label: 'DM text', type: 'textarea', default: 'Hey {{user}}, thanks for being here!' }]; },
+    preview: 'message',
+    gen: function (block, eventType, refs, varMap) { return ['await ' + refs.userRef + '.send(' + interpolate(block.config.text, varMap) + ').catch(() => {});']; },
+  },
+
+  deleteMessage: {
+    label: 'Delete the Message', icon: 'trash', color: COLORS.red, category: 'Messages',
+    allowed: function (ctx) { return ctx.hasMessage; },
+    getFields: function () { return []; },
+    gen: function () { return ['await message.delete().catch(() => {});']; },
+  },
+
+  addReaction: {
+    label: 'React to the Message', icon: 'smile', color: COLORS.yellow, category: 'Messages',
+    allowed: function (ctx) { return ctx.hasMessage; },
+    getFields: function () { return [{ key: 'emoji', label: 'Emoji', type: 'text', default: '👍' }]; },
+    gen: function (block) { return ['await message.react(' + JSON.stringify(block.config.emoji) + ').catch(() => {});']; },
+  },
+
+  addRole: {
+    label: 'Give a Role', icon: 'user-plus', color: COLORS.green, category: 'Members',
+    allowed: function (ctx) { return ctx.hasMember; },
+    getFields: function (ctx) {
+      return [
+        { key: 'roleName', label: 'Role name', type: 'text', default: 'Member' },
+        { key: 'targetWho', label: 'Who', type: 'select', default: 'invoker', options: whoOptions(ctx) },
+      ];
+    },
+    gen: function (block, eventType, refs) {
+      return [memberActionLine(block, refs, eventType, function (ref) {
+        return '{ const role = ' + ref + '.guild.roles.cache.find((r) => r.name === ' + JSON.stringify(block.config.roleName) + '); if (role) await ' + ref + '.roles.add(role).catch(() => {}); }';
+      })];
+    },
+  },
+
+  removeRole: {
+    label: 'Remove a Role', icon: 'user-minus', color: COLORS.red, category: 'Members',
+    allowed: function (ctx) { return ctx.hasMember; },
+    getFields: function (ctx) {
+      return [
+        { key: 'roleName', label: 'Role name', type: 'text', default: 'Member' },
+        { key: 'targetWho', label: 'Who', type: 'select', default: 'invoker', options: whoOptions(ctx) },
+      ];
+    },
+    gen: function (block, eventType, refs) {
+      return [memberActionLine(block, refs, eventType, function (ref) {
+        return '{ const role = ' + ref + '.guild.roles.cache.find((r) => r.name === ' + JSON.stringify(block.config.roleName) + '); if (role) await ' + ref + '.roles.remove(role).catch(() => {}); }';
+      })];
+    },
+  },
+
+  kickMember: {
+    label: 'Kick Member', icon: 'log-out', color: COLORS.red, category: 'Moderation',
+    allowed: function (ctx) { return ctx.hasMember; },
+    getFields: function (ctx) {
+      return [
+        { key: 'reason', label: 'Reason', type: 'text', default: 'Kicked by bot' },
+        { key: 'targetWho', label: 'Who', type: 'select', default: 'invoker', options: whoOptions(ctx) },
+      ];
+    },
+    gen: function (block, eventType, refs) {
+      return [memberActionLine(block, refs, eventType, function (ref) { return 'await ' + ref + '.kick(' + JSON.stringify(block.config.reason) + ').catch(() => {});'; })];
+    },
+  },
+
+  banMember: {
+    label: 'Ban Member', icon: 'ban', color: COLORS.red, category: 'Moderation',
+    allowed: function (ctx) { return ctx.hasMember; },
+    getFields: function (ctx) {
+      return [
+        { key: 'reason', label: 'Reason', type: 'text', default: 'Banned by bot' },
+        { key: 'targetWho', label: 'Who', type: 'select', default: 'invoker', options: whoOptions(ctx) },
+      ];
+    },
+    gen: function (block, eventType, refs) {
+      return [memberActionLine(block, refs, eventType, function (ref) { return 'await ' + ref + '.ban({ reason: ' + JSON.stringify(block.config.reason) + ' }).catch(() => {});'; })];
+    },
+  },
+
+  timeoutMember: {
+    label: 'Timeout Member', icon: 'clock', color: COLORS.red, category: 'Moderation',
+    allowed: function (ctx) { return ctx.hasMember; },
+    getFields: function (ctx) {
+      return [
+        { key: 'minutes', label: 'Minutes', type: 'number', default: 10 },
+        { key: 'reason', label: 'Reason', type: 'text', default: 'Timed out by bot' },
+        { key: 'targetWho', label: 'Who', type: 'select', default: 'invoker', options: whoOptions(ctx) },
+      ];
+    },
+    gen: function (block, eventType, refs) {
+      return [memberActionLine(block, refs, eventType, function (ref) {
+        return 'await ' + ref + '.timeout(' + (Number(block.config.minutes) || 10) + ' * 60 * 1000, ' + JSON.stringify(block.config.reason) + ').catch(() => {});';
+      })];
+    },
+  },
+
+  setVariable: {
+    label: 'Set a Variable', icon: 'hash', color: COLORS.textMuted, category: 'Logic',
+    allowed: function () { return true; },
+    getFields: function (ctx) {
+      return [
+        { key: 'varName', label: 'Variable', type: 'select', default: ctx.variables[0] || '', options: ctx.variables.length ? ctx.variables.map(function (v) { return [v, v]; }) : [['', 'Add a variable first ↓']] },
+        { key: 'mode', label: 'Action', type: 'select', default: 'set', options: [['set', 'Set to a value'], ['increment', 'Add 1 (for counters)']] },
+        { key: 'value', label: 'Value', type: 'text', default: '', showIf: function (c) { return c.mode === 'set'; } },
+      ];
+    },
+    gen: function (block, eventType, refs, varMap) {
+      const name = block.config.varName;
+      if (!name) return ['// (no variable selected)'];
+      if (block.config.mode === 'increment') return ['botVars[' + JSON.stringify(name) + '] = (Number(botVars[' + JSON.stringify(name) + ']) || 0) + 1;'];
+      return ['botVars[' + JSON.stringify(name) + '] = ' + interpolate(block.config.value, varMap) + ';'];
+    },
+  },
+
+  wait: {
+    label: 'Wait', icon: 'clock', color: COLORS.textMuted, category: 'Logic',
+    allowed: function () { return true; },
+    getFields: function () { return [{ key: 'seconds', label: 'Seconds to wait', type: 'number', default: 2 }]; },
+    gen: function (block) { return ['await new Promise((resolve) => setTimeout(resolve, ' + (Number(block.config.seconds) || 1) + ' * 1000));']; },
+  },
+
+  log: {
+    label: 'Log to Console', icon: 'terminal', color: COLORS.textMuted, category: 'Logic',
+    allowed: function () { return true; },
+    getFields: function () { return [{ key: 'text', label: 'Message to log', type: 'text', default: 'checkpoint reached' }]; },
+    gen: function (block, eventType, refs, varMap) { return ['console.log(' + interpolate(block.config.text, varMap) + ');']; },
+  },
+
+  ifStart: {
+    label: 'If…', icon: 'git-branch', color: COLORS.yellow, category: 'Logic',
+    allowed: function () { return true; },
+    getFields: function (ctx) {
+      const condOptions = [['random', 'Random chance']];
+      if (ctx.variables.length) condOptions.push(['varEquals', 'A variable equals…']);
+      if (ctx.hasMessage) { condOptions.push(['msgContains', 'Message contains text'], ['msgEquals', 'Message exactly equals'], ['msgStarts', 'Message starts with']); }
+      if (ctx.hasMember) condOptions.push(['hasRole', 'This member has a role']);
+      const fields = [{ key: 'cond', label: 'Check', type: 'select', default: condOptions[0][0], options: condOptions }];
+      fields.push({ key: 'percent', label: 'Chance (%)', type: 'number', default: 50, showIf: function (c) { return c.cond === 'random'; } });
+      if (ctx.variables.length) {
+        fields.push({ key: 'varName', label: 'Variable', type: 'select', default: ctx.variables[0], options: ctx.variables.map(function (v) { return [v, v]; }), showIf: function (c) { return c.cond === 'varEquals'; } });
+        fields.push({ key: 'varValue', label: 'Equals', type: 'text', default: '', showIf: function (c) { return c.cond === 'varEquals'; } });
+      }
+      fields.push({ key: 'text', label: 'Text', type: 'text', default: '', showIf: function (c) { return ['msgContains', 'msgEquals', 'msgStarts'].indexOf(c.cond) !== -1; } });
+      fields.push({ key: 'roleName', label: 'Role name', type: 'text', default: 'Member', showIf: function (c) { return c.cond === 'hasRole'; } });
+      return fields;
+    },
+    gen: function (block, eventType, refs) {
+      const c = block.config;
+      let expr = 'true';
+      if (c.cond === 'random') expr = 'Math.random() * 100 < ' + (Number(c.percent) || 50);
+      else if (c.cond === 'varEquals') expr = 'String(botVars[' + JSON.stringify(c.varName) + ']) === ' + JSON.stringify(c.varValue || '');
+      else if (c.cond === 'msgContains') expr = 'message.content.toLowerCase().includes(' + JSON.stringify((c.text || '').toLowerCase()) + ')';
+      else if (c.cond === 'msgEquals') expr = 'message.content.toLowerCase() === ' + JSON.stringify((c.text || '').toLowerCase());
+      else if (c.cond === 'msgStarts') expr = 'message.content.toLowerCase().startsWith(' + JSON.stringify((c.text || '').toLowerCase()) + ')';
+      else if (c.cond === 'hasRole') expr = refs.memberRef + ' && ' + refs.memberRef + '.roles.cache.some((r) => r.name === ' + JSON.stringify(c.roleName) + ')';
+      return ['if (' + expr + ') {'];
+    },
+  },
+
+  elseBlock: { label: 'Otherwise…', icon: 'git-branch', color: COLORS.yellow, category: 'Logic', allowed: function () { return true; }, getFields: function () { return []; }, gen: function () { return ['} else {']; } },
+  ifEnd: { label: 'End If', icon: 'git-branch', color: COLORS.yellow, category: 'Logic', allowed: function () { return true; }, getFields: function () { return []; }, gen: function () { return ['}']; } },
+  repeatStart: {
+    label: 'Repeat…', icon: 'repeat', color: COLORS.yellow, category: 'Logic',
+    allowed: function () { return true; },
+    getFields: function () { return [{ key: 'times', label: 'Number of times', type: 'number', default: 3 }]; },
+    gen: function (block) { return ['for (let i = 0; i < ' + (Number(block.config.times) || 3) + '; i++) {']; },
+  },
+  repeatEnd: { label: 'End Repeat', icon: 'repeat', color: COLORS.yellow, category: 'Logic', allowed: function () { return true; }, getFields: function () { return []; }, gen: function () { return ['}']; } },
+};
+
+const ACTION_CATEGORIES = ['Messages', 'Members', 'Moderation', 'Logic'];
+
+/* ============================================================
+   CONTEXT BUILDER
+   ============================================================ */
+function ctxFor(script, variables) {
+  const meta = EVENT_META[script.event.type];
+  const userOptions = [];
+  const otherOptions = [];
+  if (script.event.type === 'slashCommand') {
+    ['opt1', 'opt2'].forEach(function (k) {
+      const n = script.event.config[k + 'Name'];
+      if (n) {
+        if (script.event.config[k + 'Type'] === 'user') userOptions.push(n);
+        else otherOptions.push(n);
+      }
+    });
+  }
+  return {
+    eventType: script.event.type,
+    hasMessage: meta.hasMessage, hasMember: meta.hasMember, hasUser: meta.hasUser,
+    canReply: meta.canReply, canSame: meta.canSame,
+    userOptions: userOptions, otherOptions: otherOptions,
+    variables: variables.map(function (v) { return v.name; }).filter(Boolean),
+  };
+}
+
+/* ============================================================
+   CODE GENERATION
+   ============================================================ */
+function generateScriptBody(script, variables) {
+  const eventType = script.event.type;
+  const refs = getRefs(eventType);
+  const varMap = getVarMap(eventType, script.event.config, refs);
+  let depth = 1;
+  const lines = [];
+  function push(s, d) { lines.push('  '.repeat(d === undefined ? depth : d) + s); }
+
+  if (eventType === 'messageCreate') {
+    if (script.event.config.ignoreBots !== false) push('if (message.author.bot) return;');
+    const ft = script.event.config.filterType;
+    if (ft && ft !== 'any') {
+      const t = (script.event.config.filterText || '').toLowerCase();
+      if (ft === 'contains') push('if (!message.content.toLowerCase().includes(' + JSON.stringify(t) + ')) return;');
+      if (ft === 'equals') push('if (message.content.toLowerCase() !== ' + JSON.stringify(t) + ') return;');
+      if (ft === 'startsWith') push('if (!message.content.toLowerCase().startsWith(' + JSON.stringify(t) + ')) return;');
+    }
+  }
+  if (eventType === 'slashCommand') {
+    push('if (!interaction.isChatInputCommand() || interaction.commandName !== ' + JSON.stringify(script.event.config.commandName || '') + ') return;');
+  }
+  if (eventType === 'messageReactionAdd') {
+    push('if (reaction.partial) { try { await reaction.fetch(); } catch { return; } }');
+    if (script.event.config.emojiFilter === 'specific') {
+      push('if (reaction.emoji.name !== ' + JSON.stringify(script.event.config.emoji || '') + ') return;');
+    }
+    push('if (user.bot) return;');
+    const needsMember = script.blocks.some(function (b) { return ['addRole', 'removeRole', 'kickMember', 'banMember', 'timeoutMember'].indexOf(b.type) !== -1; });
+    if (needsMember) {
+      push('const member = await reaction.message.guild.members.fetch(user.id).catch(() => null);');
+      push('if (!member) return;');
+    }
+  }
+
+  script.blocks.forEach(function (block) {
+    const def = ACTION_DEFS[block.type];
+    if (!def) return;
+    if (block.type === 'ifEnd' || block.type === 'repeatEnd') depth = Math.max(1, depth - 1);
+    const lineDepth = block.type === 'elseBlock' ? Math.max(1, depth - 1) : depth;
+    const genLines = def.gen(block, eventType, refs, varMap);
+    genLines.forEach(function (l) { push(l, lineDepth); });
+    if (block.type === 'ifStart' || block.type === 'repeatStart') depth += 1;
+  });
+
+  return lines.join('\n');
+}
+
+function generateFullCode(scripts, variables, botName) {
+  const intents = new Set(['GatewayIntentBits.Guilds']);
+  const partialsNeeded = new Set();
+  let needsGuildMembers = false, needsReactions = false, needsMessages = false;
+  scripts.forEach(function (s) {
+    if (s.event.type === 'messageCreate') needsMessages = true;
+    if (s.event.type === 'messageReactionAdd') { needsReactions = true; needsMessages = true; }
+    if (['guildMemberAdd', 'guildMemberRemove'].indexOf(s.event.type) !== -1) needsGuildMembers = true;
+    s.blocks.forEach(function (b) { if (['addRole', 'removeRole', 'kickMember', 'banMember', 'timeoutMember'].indexOf(b.type) !== -1) needsGuildMembers = true; });
+  });
+  if (needsMessages) { intents.add('GatewayIntentBits.GuildMessages'); intents.add('GatewayIntentBits.MessageContent'); }
+  if (needsReactions) {
+    intents.add('GatewayIntentBits.GuildMessageReactions');
+    partialsNeeded.add('Partials.Message'); partialsNeeded.add('Partials.Reaction'); partialsNeeded.add('Partials.User');
+  }
+  if (needsGuildMembers) intents.add('GatewayIntentBits.GuildMembers');
+
+  const slashScripts = scripts.filter(function (s) { return s.event.type === 'slashCommand'; });
+  const otherScripts = scripts.filter(function (s) { return s.event.type !== 'slashCommand' && s.event.type !== 'ready'; });
+  const readyScripts = scripts.filter(function (s) { return s.event.type === 'ready'; });
+
+  const slashCommandsCode = slashScripts.map(function (s) {
+    const c = s.event.config;
+    const opts = [];
+    ['opt1', 'opt2'].forEach(function (k) {
+      if (c[k + 'Name']) {
+        const typeMap = { string: 'ApplicationCommandOptionType.String', integer: 'ApplicationCommandOptionType.Integer', user: 'ApplicationCommandOptionType.User' };
+        opts.push('{ name: ' + JSON.stringify(c[k + 'Name']) + ', description: ' + JSON.stringify(c[k + 'Name']) + ', type: ' + typeMap[c[k + 'Type'] || 'string'] + ', required: ' + (!!c[k + 'Required']) + ' }');
+      }
+    });
+    return '  { name: ' + JSON.stringify(c.commandName || 'command') + ', description: ' + JSON.stringify(c.description || 'A slash command') + ', options: [' + opts.join(', ') + '] }';
+  }).join(',\n');
+
+  const listenerBlocks = slashScripts.concat(otherScripts).map(function (s) {
+    const evName = s.event.type === 'slashCommand' ? 'interactionCreate' : s.event.type;
+    const body = generateScriptBody(s, variables);
+    const params = s.event.type === 'slashCommand' ? 'interaction' :
+      s.event.type === 'messageCreate' ? 'message' :
+      s.event.type === 'guildMemberAdd' ? 'member' :
+      s.event.type === 'guildMemberRemove' ? 'member' :
+      s.event.type === 'messageReactionAdd' ? 'reaction, user' : '';
+    return 'client.on(' + JSON.stringify(evName) + ', async (' + params + ') => {\n' + body + '\n});';
+  }).join('\n\n');
+
+  const readyBody = readyScripts.length ? generateScriptBody(readyScripts[0], variables) : '';
+  const varsInit = variables.filter(function (v) { return v.name; }).map(function (v) { return '  ' + JSON.stringify(v.name) + ': ' + JSON.stringify(v.value || ''); }).join(',\n');
+  const readyLogLine = '  console.log(' + JSON.stringify('✅ ' + (botName || 'Bot') + ' is online as ') + ' + client.user.tag);';
+  const cmdLogLine = '    console.log(' + JSON.stringify('📋 Registered ') + ' + slashCommands.length + ' + JSON.stringify(' slash command(s).') + ');';
+  const intentsArr = Array.from(intents);
+  const partialsArr = Array.from(partialsNeeded);
+
+  return 'const { Client, GatewayIntentBits, Partials, EmbedBuilder, ApplicationCommandOptionType } = require(\'discord.js\');\n' +
+'require(\'dotenv\').config();\n\n' +
+'// Built with the Discord Bot Builder\n' +
+'const client = new Client({\n' +
+'  intents: [' + intentsArr.join(', ') + '],' + (partialsArr.length ? '\n  partials: [' + partialsArr.join(', ') + '],' : '') + '\n' +
+'});\n\n' +
+'// Variables your bot remembers while it\'s running\n' +
+'let botVars = {\n' +
+varsInit + '\n' +
+'};\n\n' +
+'const slashCommands = [\n' +
+slashCommandsCode + '\n' +
+'];\n\n' +
+'client.once(\'ready\', async () => {\n' +
+readyLogLine + '\n' +
+'  if (slashCommands.length > 0) {\n' +
+'    for (const guild of client.guilds.cache.values()) {\n' +
+'      try {\n' +
+'        await guild.commands.set(slashCommands);\n' +
+'      } catch (err) {\n' +
+'        console.error(\'Could not register commands for\', guild.name, err);\n' +
+'      }\n' +
+'    }\n' +
+cmdLogLine + '\n' +
+'  }\n' +
+readyBody + '\n' +
+'});\n\n' +
+listenerBlocks + '\n\n' +
+'client.on(\'error\', console.error);\n' +
+'client.login(process.env.DISCORD_TOKEN);\n';
+}
+
+function generatePackageJson(botName) {
+  const safeName = (botName || 'my-discord-bot').toLowerCase().replace(/[^a-z0-9-]+/g, '-').replace(/^-+|-+$/g, '') || 'my-discord-bot';
+  return JSON.stringify({
+    name: safeName, version: '1.0.0', description: 'A Discord bot built with the Discord Bot Builder',
+    main: 'index.js', type: 'commonjs', scripts: { start: 'node index.js' },
+    dependencies: { 'discord.js': '^14.14.1', dotenv: '^16.4.5' },
+  }, null, 2) + '\n';
+}
+
+function generateReadme(botName, scripts) {
+  const triggers = scripts.map(function (s) {
+    return '- **' + EVENT_DEFS[s.event.type].label + '** — ' + s.blocks.length + ' action' + (s.blocks.length === 1 ? '' : 's');
+  }).join('\n') || '- (no triggers added yet)';
+  return '# ' + (botName || 'My Discord Bot') + '\n\n' +
+'Built with the Discord Bot Builder.\n\n' +
+'## What this bot does\n' + triggers + '\n\n' +
+'## Setup\n' +
+'1. Run `npm install`\n' +
+'2. Copy `.env.example` to `.env` and paste in your bot token\n' +
+'3. Run `npm start`\n\n' +
+'See the Setup tab in the builder for the full walkthrough, including how to create your bot on Discord and invite it to your server.\n';
+}
+
+const PERMS = [
+  { key: 'base', bit: 1024 + 2048 + 65536, label: 'View Channels, Send Messages, Read Message History', always: true },
+  { key: 'embed', bit: 16384, label: 'Embed Links', when: function (u) { return u.has('sendEmbed'); } },
+  { key: 'react', bit: 64, label: 'Add Reactions', when: function (u) { return u.has('addReaction') || u.has('event:messageReactionAdd'); } },
+  { key: 'manageMsgs', bit: 8192, label: 'Manage Messages (delete)', when: function (u) { return u.has('deleteMessage'); } },
+  { key: 'roles', bit: 268435456, label: 'Manage Roles', when: function (u) { return u.has('addRole') || u.has('removeRole'); } },
+  { key: 'kick', bit: 2, label: 'Kick Members', when: function (u) { return u.has('kickMember'); } },
+  { key: 'ban', bit: 4, label: 'Ban Members', when: function (u) { return u.has('banMember'); } },
+  { key: 'timeout', bit: 1099511627776, label: 'Moderate Members (timeout)', when: function (u) { return u.has('timeoutMember'); } },
+];
+
+function computePermissions(scripts) {
+  const used = new Set();
+  scripts.forEach(function (s) {
+    used.add('event:' + s.event.type);
+    s.blocks.forEach(function (b) { used.add(b.type); });
+  });
+  let total = 0;
+  const list = PERMS.map(function (p) {
+    const on = p.always || (p.when && p.when(used));
+    if (on) total += p.bit;
+    return { label: p.label, on: on };
+  });
+  return { total: total, list: list };
+}
+
+function validateScript(script) {
+  const warnings = [];
+  let ifDepth = 0, repeatDepth = 0;
+  script.blocks.forEach(function (b) {
+    if (b.type === 'ifStart') ifDepth += 1;
+    if (b.type === 'ifEnd') ifDepth = Math.max(0, ifDepth - 1);
+    if (b.type === 'repeatStart') repeatDepth += 1;
+    if (b.type === 'repeatEnd') repeatDepth = Math.max(0, repeatDepth - 1);
+  });
+  if (ifDepth !== 0) warnings.push('An "If" block is missing its matching "End If".');
+  if (repeatDepth !== 0) warnings.push('A "Repeat" block is missing its matching "End Repeat".');
+  if (script.event.type === 'slashCommand') {
+    const name = script.event.config.commandName || '';
+    if (!/^[a-z0-9_-]{1,32}$/.test(name)) warnings.push('Command name should be lowercase letters, numbers, - or _, no spaces.');
+  }
+  return warnings;
+}
+
+/* ============================================================
+   TEMPLATES
+   ============================================================ */
+const TEMPLATES = [
+  {
+    id: 'welcome', name: 'Welcome Greeter', icon: 'party',
+    desc: 'Greets new members in #welcome and gives them a role.',
+    build: function () {
+      return [{
+        id: genId('s'), event: { type: 'guildMemberAdd', config: {} },
+        blocks: [
+          { id: genId('a'), type: 'sendMessage', config: { target: 'named', channelName: 'welcome', text: 'Welcome to the server, {{mention}}! 🎉 Make yourself at home.' } },
+          { id: genId('a'), type: 'addRole', config: { roleName: 'Member', targetWho: 'invoker' } },
+        ],
+      }];
+    },
+  },
+  {
+    id: 'reactionroles', name: 'Reaction Roles', icon: 'smile',
+    desc: 'React with ✅ on a message to receive the Verified role.',
+    build: function () {
+      return [{
+        id: genId('s'), event: { type: 'messageReactionAdd', config: { emojiFilter: 'specific', emoji: '✅' } },
+        blocks: [{ id: genId('a'), type: 'addRole', config: { roleName: 'Verified', targetWho: 'invoker' } }],
+      }];
+    },
+  },
+  {
+    id: 'autoreply', name: 'Friendly Auto-Reply', icon: 'message-square',
+    desc: 'Replies whenever someone says "good bot".',
+    build: function () {
+      return [{
+        id: genId('s'), event: { type: 'messageCreate', config: { filterType: 'contains', filterText: 'good bot', ignoreBots: true } },
+        blocks: [{ id: genId('a'), type: 'sendMessage', config: { target: 'reply', text: 'Aww, thank you {{user}}! 💙' } }],
+      }];
+    },
+  },
+  {
+    id: 'ping', name: 'Ping Slash Command', icon: 'terminal',
+    desc: 'Adds a /ping command that replies "Pong!".',
+    build: function () {
+      return [{
+        id: genId('s'), event: { type: 'slashCommand', config: { commandName: 'ping', description: 'Check if the bot is online', opt1Name: '', opt2Name: '' } },
+        blocks: [{ id: genId('a'), type: 'sendMessage', config: { target: 'reply', text: '🏓 Pong! I\'m online.' } }],
+      }];
+    },
+  },
+  {
+    id: 'kickcmd', name: 'Moderation: /kick', icon: 'log-out',
+    desc: 'Adds a /kick command that targets whichever member you pick.',
+    build: function () {
+      return [{
+        id: genId('s'), event: { type: 'slashCommand', config: { commandName: 'kick', description: 'Kick a member from the server', opt1Name: 'member', opt1Type: 'user', opt1Required: true, opt2Name: '' } },
+        blocks: [
+          { id: genId('a'), type: 'kickMember', config: { reason: 'Kicked by moderator', targetWho: 'option:member' } },
+          { id: genId('a'), type: 'sendMessage', config: { target: 'reply', text: '👢 Done — that member was kicked.' } },
+        ],
+      }];
+    },
+  },
+];
+
+/* ============================================================
+   STATE
+   ============================================================ */
+const state = {
+  botName: 'My Bot',
+  scripts: [],
+  variables: [],
+  selectedScriptId: null,
+  activeTab: 'build',
+  pickerOpen: false,
+  eventPickerOpen: false,
+  varsOpen: false,
+  clientId: '',
+};
+
+const TABS = [
+  { id: 'build', label: 'Build', icon: 'wand' },
+  { id: 'code', label: 'Code', icon: 'code' },
+  { id: 'files', label: 'Files', icon: 'file-text' },
+  { id: 'setup', label: 'Setup', icon: 'rocket' },
+];
+
+/* ============================================================
+   STATE MUTATIONS
+   ============================================================ */
+function addScript(eventType) {
+  const config = {};
+  EVENT_DEFS[eventType].fields().forEach(function (f) { config[f.key] = f.default; });
+  const newScript = { id: genId('s'), event: { type: eventType, config: config }, blocks: [] };
+  state.scripts.push(newScript);
+  state.selectedScriptId = newScript.id;
+  state.eventPickerOpen = false;
+  state.activeTab = 'build';
+}
+function loadTemplate(id) {
+  const tpl = TEMPLATES.filter(function (t) { return t.id === id; })[0];
+  if (!tpl) return;
+  const built = tpl.build();
+  state.scripts = state.scripts.concat(built);
+  state.selectedScriptId = built[0].id;
+}
+function deleteScript(id) {
+  state.scripts = state.scripts.filter(function (s) { return s.id !== id; });
+  if (state.selectedScriptId === id) state.selectedScriptId = null;
+}
+function addBlock(type) {
+  const script = state.scripts.filter(function (s) { return s.id === state.selectedScriptId; })[0];
+  if (!script) return;
+  const ctx = ctxFor(script, state.variables);
+  const def = ACTION_DEFS[type];
+  const config = {};
+  def.getFields(ctx).forEach(function (f) { config[f.key] = f.default; });
+  script.blocks.push({ id: genId('a'), type: type, config: config });
+  state.pickerOpen = false;
+}
+function deleteBlock(scriptId, blockId) {
+  const script = state.scripts.filter(function (s) { return s.id === scriptId; })[0];
+  if (script) script.blocks = script.blocks.filter(function (b) { return b.id !== blockId; });
+}
+function moveBlock(scriptId, blockId, dir) {
+  const script = state.scripts.filter(function (s) { return s.id === scriptId; })[0];
+  if (!script) return;
+  const idx = script.blocks.findIndex(function (b) { return b.id === blockId; });
+  const newIdx = idx + dir;
+  if (newIdx < 0 || newIdx >= script.blocks.length) return;
+  const tmp = script.blocks[idx];
+  script.blocks[idx] = script.blocks[newIdx];
+  script.blocks[newIdx] = tmp;
+}
+function addVariable() {
+  state.variables.push({ id: genId('v'), name: 'counter' + (state.variables.length + 1), value: '0' });
+}
+function deleteVariable(id) {
+  state.variables = state.variables.filter(function (v) { return v.id !== id; });
+}
+function closeAllModals() {
+  state.eventPickerOpen = false;
+  state.pickerOpen = false;
+  state.varsOpen = false;
+}
+function hasWarnings() {
+  return state.scripts.some(function (s) { return validateScript(s).length > 0; });
+}
+
+/* ============================================================
+   PREVIEW RENDERING
+   ============================================================ */
+function sampleize(str, ctx) {
+  if (!str) return '';
+  const samples = { user: 'Alex', mention: '@Alex', server: 'My Server', message: 'hey everyone', channel: 'general', emoji: '✅' };
+  (ctx.userOptions || []).forEach(function (n) { samples['option:' + n] = 'Sam'; });
+  (ctx.otherOptions || []).forEach(function (n) { samples['option:' + n] = '42'; });
+  return str.replace(/\{\{\s*([\w:]+)\s*\}\}/g, function (m, k) { return samples[k] !== undefined ? samples[k] : m; });
+}
+function messagePreviewHTML(text, ctx) {
+  const sample = sampleize(text, ctx);
+  const body = sample ? esc(sample) : '<span style="font-style:italic;color:var(--text-dim)">Nothing to show yet…</span>';
+  return '<div class="preview"><div class="preview-avatar">' + icon('bot', 18, '#fff') + '</div>' +
+    '<div style="min-width:0;flex:1"><div class="preview-name-row"><span class="preview-name">Your Bot</span>' +
+    '<span class="preview-app-badge">APP</span><span class="preview-time">Today at 12:34 PM</span></div>' +
+    '<p class="preview-text">' + body + '</p></div></div>';
+}
+function embedPreviewHTML(config, ctx) {
+  const title = config.title ? '<p class="preview-embed-title">' + esc(sampleize(config.title, ctx)) + '</p>' : '';
+  const desc = config.description ? '<p class="preview-embed-desc">' + esc(sampleize(config.description, ctx)) + '</p>' : '';
+  const img = config.imageUrl ? '<div class="preview-embed-image">image preview</div>' : '';
+  const footer = config.footer ? '<p class="preview-embed-footer">' + esc(sampleize(config.footer, ctx)) + '</p>' : '';
+  return '<div class="preview"><div class="preview-avatar">' + icon('bot', 18, '#fff') + '</div>' +
+    '<div style="min-width:0;flex:1"><div class="preview-name-row"><span class="preview-name">Your Bot</span>' +
+    '<span class="preview-app-badge">APP</span></div>' +
+    '<div class="preview-embed-box" style="border-left-color:' + (config.color || '#5865F2') + '">' + title + desc + img + footer + '</div></div></div>';
+}
+
+/* ============================================================
+   FIELD RENDERING
+   ============================================================ */
+function fieldHTML(field, value, dataAttrs) {
+  const val = value !== undefined ? value : field.default;
+  if (field.type === 'checkbox') {
+    return '<label class="checkbox-row"><input type="checkbox" ' + (val ? 'checked' : '') + ' ' + dataAttrs + ' />' + esc(field.label) + '</label>';
+  }
+  let inputHTML = '';
+  if (field.type === 'select') {
+    const opts = (field.options || []).map(function (o) {
+      return '<option value="' + esc(o[0]) + '" ' + (String(o[0]) === String(val) ? 'selected' : '') + '>' + esc(o[1]) + '</option>';
+    }).join('');
+    inputHTML = '<select class="field-input" ' + dataAttrs + '>' + opts + '</select>';
+  } else if (field.type === 'textarea') {
+    inputHTML = '<textarea class="field-input" placeholder="' + esc(field.placeholder || '') + '" ' + dataAttrs + '>' + esc(val || '') + '</textarea>';
+  } else if (field.type === 'number') {
+    inputHTML = '<input type="number" class="field-input" value="' + esc(val) + '" ' + dataAttrs + ' />';
+  } else if (field.type === 'color') {
+    inputHTML = '<div class="color-row"><input type="color" value="' + esc(val || '#5865F2') + '" ' + dataAttrs + ' /><span>' + esc(val || '#5865F2') + '</span></div>';
+  } else {
+    inputHTML = '<input type="text" class="field-input" value="' + esc(val || '') + '" placeholder="' + esc(field.placeholder || '') + '" ' + dataAttrs + ' />';
+  }
+  return '<div><label class="field-label">' + esc(field.label) + '</label>' + inputHTML + '</div>';
+}
+
+function eventCardHTML(script) {
+  const def = EVENT_DEFS[script.event.type];
+  const fields = def.fields().filter(function (f) { return !f.showIf || f.showIf(script.event.config); });
+  const fieldsHTML = fields.map(function (f) {
+    return fieldHTML(f, script.event.config[f.key], 'data-field-script="' + script.id + '" data-field-key="' + f.key + '"');
+  }).join('');
+  return '<div class="event-card" style="border-color:' + def.color + '80">' +
+    '<div class="event-card-head" style="background:' + def.color + '1f;border-left-color:' + def.color + '">' +
+    icon(def.icon, 17, def.color) +
+    '<div><div class="event-card-title">' + esc(def.label) + '</div><div class="event-card-desc">' + esc(def.desc) + '</div></div></div>' +
+    (fieldsHTML ? '<div class="event-card-body">' + fieldsHTML + '</div>' : '') + '</div>';
+}
+
+function blockCardHTML(script, block) {
+  const def = ACTION_DEFS[block.type];
+  if (!def) return '';
+  const ctx = ctxFor(script, state.variables);
+  const allFields = def.getFields(ctx);
+  const fields = allFields.filter(function (f) { return !f.showIf || f.showIf(block.config); });
+  const idx = script.blocks.findIndex(function (b) { return b.id === block.id; });
+  const isFirst = idx === 0, isLast = idx === script.blocks.length - 1;
+  const fieldsHTML = fields.map(function (f) {
+    return fieldHTML(f, block.config[f.key], 'data-field-script="' + script.id + '" data-field-block="' + block.id + '" data-field-key="' + f.key + '"');
+  }).join('');
+  let previewHTML = '';
+  if (def.preview === 'message') previewHTML = '<div id="preview-' + block.id + '">' + messagePreviewHTML(block.config.text, ctx) + '</div>';
+  if (def.preview === 'embed') previewHTML = '<div id="preview-' + block.id + '">' + embedPreviewHTML(block.config, ctx) + '</div>';
+  const bodyInner = fieldsHTML + previewHTML;
+  return '<div class="block-card" id="blockcard-' + block.id + '">' +
+    '<div class="block-card-head" style="border-left-color:' + def.color + '">' +
+    icon(def.icon, 16, def.color) +
+    '<span class="block-card-title">' + esc(def.label) + '</span>' +
+    '<button class="icon-btn" data-act="move-block" data-script="' + script.id + '" data-block="' + block.id + '" data-dir="-1" ' + (isFirst ? 'disabled' : '') + '>' + icon('chevron-up', 15) + '</button>' +
+    '<button class="icon-btn" data-act="move-block" data-script="' + script.id + '" data-block="' + block.id + '" data-dir="1" ' + (isLast ? 'disabled' : '') + '>' + icon('chevron-down', 15) + '</button>' +
+    '<button class="icon-btn" data-act="delete-block" data-script="' + script.id + '" data-block="' + block.id + '">' + icon('x', 15) + '</button>' +
+    '</div>' + (bodyInner ? '<div class="block-card-body">' + bodyInner + '</div>' : '') + '</div>';
+}
+
+/* ============================================================
+   TAB RENDERING
+   ============================================================ */
+function buildTabHTML() {
+  if (state.scripts.length === 0) {
+    const items = TEMPLATES.map(function (t) {
+      return '<button class="modal-item" data-act="load-template" data-id="' + t.id + '">' +
+        '<div class="icon-tag" style="background:' + COLORS.blurple + '26">' + icon(t.icon, 16, COLORS.blurple) + '</div>' +
+        '<div style="min-width:0;flex:1"><div class="modal-item-title">' + esc(t.name) + '</div><div class="modal-item-desc">' + esc(t.desc) + '</div></div>' +
+        icon('chevron-right', 16, 'var(--text-dim)') + '</button>';
+    }).join('');
+    return '<div class="quickstart-card"><div class="quickstart-head">' + icon('sparkles', 16, 'var(--blurple)') + '<span>Quick start</span></div>' +
+      '<div class="quickstart-desc">Tap a template to drop in a working feature, then tweak it. You can add more triggers any time.</div>' +
+      items + '</div>' +
+      '<button class="btn btn-dashed btn-block" data-act="open-event-picker">' + icon('plus', 16) + ' Start from scratch</button>';
+  }
+
+  const chips = state.scripts.map(function (s) {
+    const def = EVENT_DEFS[s.event.type];
+    const active = s.id === state.selectedScriptId;
+    const warn = validateScript(s).length > 0;
+    const style = active ? 'background:' + def.color + '2a;border-color:' + def.color + ';color:var(--text)' : '';
+    return '<button class="chip" data-act="select-script" data-id="' + s.id + '" style="' + style + '">' +
+      icon(def.icon, 13, def.color) + ' ' + esc(def.label) + (warn ? '<span class="chip-dot"></span>' : '') + '</button>';
+  }).join('');
+
+  const script = state.scripts.filter(function (s) { return s.id === state.selectedScriptId; })[0];
+  let selectedHTML = '<div class="empty-state">Select a trigger above, or add a new one.</div>';
+  if (script) {
+    const warnings = validateScript(script);
+    const blocksHTML = script.blocks.map(function (b) { return blockCardHTML(script, b); }).join('');
+    selectedHTML =
+      '<div style="display:flex;align-items:center;justify-content:space-between;margin:10px 0">' +
+      '<span style="font-size:12px;color:var(--text-dim)">' + script.blocks.length + ' action' + (script.blocks.length === 1 ? '' : 's') + '</span>' +
+      '<button class="btn-danger-link" data-act="delete-script" data-id="' + script.id + '">' + icon('trash', 13, 'var(--red)') + ' Delete this trigger</button>' +
+      '</div>' +
+      eventCardHTML(script) +
+      (warnings.length ? '<div class="warning-banner">' + icon('alert-triangle', 15, 'var(--yellow)') + '<div class="warning-text">' + warnings.map(function (w) { return '<div>' + esc(w) + '</div>'; }).join('') + '</div></div>' : '') +
+      '<div>' + blocksHTML + '</div>' +
+      '<button class="btn btn-primary btn-block" style="margin-top:4px" data-act="open-picker">' + icon('plus', 16) + ' Add Action</button>' +
+      '<button class="btn btn-secondary btn-block" style="margin-top:8px" data-act="open-vars">' + icon('hash', 14) + ' Variables (' + state.variables.length + ')</button>';
+  }
+
+  return '<div class="chip-row">' + chips +
+    '<button class="chip" style="border-style:dashed;background:transparent;color:var(--text-muted)" data-act="open-event-picker">' + icon('plus', 13) + ' New trigger</button></div>' +
+    selectedHTML;
+}
+
+function codeTabHTML() {
+  const code = generateFullCode(state.scripts, state.variables, state.botName);
+  const warnings = [];
+  state.scripts.forEach(function (s) { validateScript(s).forEach(function (w) { warnings.push(EVENT_DEFS[s.event.type].label + ': ' + w); }); });
+  return (warnings.length ? '<div class="warning-banner">' + icon('alert-triangle', 15, 'var(--yellow)') + '<div class="warning-text">' + warnings.map(function (w) { return '<div>' + esc(w) + '</div>'; }).join('') + '</div></div>' : '') +
+    '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">' +
+    '<span style="font-size:14px;font-weight:700;color:var(--text)">index.js</span>' +
+    '<button class="btn btn-secondary btn-sm" data-act="copy" data-copy="code">' + icon('copy', 13) + ' Copy</button></div>' +
+    '<pre class="code-block">' + esc(code) + '</pre>';
+}
+
+function filesTabHTML() {
+  const code = generateFullCode(state.scripts, state.variables, state.botName);
+  const pkg = generatePackageJson(state.botName);
+  const env = 'DISCORD_TOKEN=paste_your_bot_token_here\n';
+  const readme = generateReadme(state.botName, state.scripts);
+  const files = [
+    { name: 'index.js', content: code, key: 'code' },
+    { name: 'package.json', content: pkg, key: 'pkg' },
+    { name: '.env.example', content: env, key: 'env' },
+    { name: 'README.md', content: readme, key: 'readme' },
+  ];
+  return files.map(function (f) {
+    const preview = f.content.length > 600 ? f.content.slice(0, 600) + '\n…' : f.content;
+    return '<div class="card"><div class="file-card-head"><div class="file-card-name">' + icon('file-text', 15, 'var(--blurple)') + ' ' + esc(f.name) + '</div>' +
+      '<div class="file-actions"><button class="btn btn-secondary btn-sm" data-act="copy" data-copy="' + f.key + '">' + icon('copy', 13) + ' Copy</button>' +
+      '<button class="btn btn-secondary btn-sm" data-act="download" data-copy="' + f.key + '" data-file="' + esc(f.name) + '">' + icon('download', 13) + ' Download</button></div></div>' +
+      '<pre class="file-preview">' + esc(preview) + '</pre></div>';
+  }).join('');
+}
+
+function stepHTML(n, iconName, title, bodyHTML) {
+  return '<div class="setup-step"><div class="setup-step-head"><div class="setup-step-num">' + n + '</div>' +
+    icon(iconName, 15, 'var(--text-muted)') + '<span class="setup-step-title">' + esc(title) + '</span></div>' +
+    '<div class="setup-body">' + bodyHTML + '</div></div>';
+}
+
+function inviteAreaHTML(permInfo) {
+  const cid = state.clientId.trim();
+  if (!cid) return '<p style="font-size:12px;font-style:italic;color:var(--text-dim)">Paste your Application ID above to generate the link.</p>';
+  const url = 'https://discord.com/api/oauth2/authorize?client_id=' + encodeURIComponent(cid) + '&permissions=' + permInfo.total + '&scope=bot%20applications.commands';
+  return '<div class="invite-row"><a class="btn btn-primary invite-btn" href="' + esc(url) + '" target="_blank" rel="noopener noreferrer">Open Invite Link ' + icon('external-link', 13, '#fff') + '</a>' +
+    '<button class="btn btn-secondary btn-sm" data-act="copy" data-copy="invite">' + icon('copy', 13) + ' Copy link</button></div>';
+}
+
+function setupTabHTML() {
+  const needsMessageContent = state.scripts.some(function (s) { return s.event.type === 'messageCreate'; });
+  const needsMembers = state.scripts.some(function (s) { return ['guildMemberAdd', 'guildMemberRemove'].indexOf(s.event.type) !== -1; }) ||
+    state.scripts.some(function (s) { return s.blocks.some(function (b) { return ['addRole', 'removeRole', 'kickMember', 'banMember', 'timeoutMember'].indexOf(b.type) !== -1; }); });
+  const permInfo = computePermissions(state.scripts);
+  let intentsList = '';
+  if (needsMessageContent) intentsList += '<li><b>Message Content Intent</b> — lets your bot read the text of messages (needed for "Message Received" triggers and any text-matching If blocks).</li>';
+  if (needsMembers) intentsList += '<li><b>Server Members Intent</b> — lets your bot see the full member list and manage roles/kicks/bans/timeouts.</li>';
+  const intentsBlock = (needsMessageContent || needsMembers)
+    ? '<ul>' + intentsList + '</ul>'
+    : '<p style="font-style:italic;color:var(--text-dim)">Your current build doesn\'t need any privileged intents yet — you can skip this toggle for now and come back if you add message-reading or member-management features later.</p>';
+
+  return stepHTML(1, 'bot', 'Create your bot application',
+      '<p>Go to the Discord Developer Portal (sign in with your normal Discord account first if it asks). Click the <b>New Application</b> button in the top-right corner.</p>' +
+      '<p>Type a name for your bot and accept the Developer Terms of Service, then click <b>Create</b>. The name you pick becomes your bot\'s default username in Discord — you can change it later, or add an icon, from the <b>General Information</b> page you land on.</p>' +
+      '<a class="link" href="https://discord.com/developers/applications" target="_blank" rel="noopener noreferrer">discord.com/developers/applications ' + icon('external-link', 13) + '</a>') +
+
+    stepHTML(2, 'key', 'Get your token &amp; turn on intents',
+      '<p>In the left-hand sidebar of your application, click <b>Bot</b>.</p>' +
+      '<ul>' +
+        '<li>Click <b>Reset Token</b>, confirm, and Discord will show you a long string — that\'s your bot\'s token. Click to copy it.</li>' +
+        '<li>Treat this token like a password: anyone who has it can fully control your bot. Never post it in Discord, commit it to GitHub, or paste it in a screenshot. It only ever goes in your <code>.env</code> file (step 5). If you ever think it\'s leaked, come back here and hit <b>Reset Token</b> again to invalidate the old one.</li>' +
+      '</ul>' +
+      '<p>On that same Bot page, scroll down to <b>Privileged Gateway Intents</b> and turn on whichever of these your build uses:</p>' +
+      intentsBlock) +
+
+    stepHTML(3, 'link', 'Build your invite link',
+      '<p>Go back to <b>General Information</b> at the top of the sidebar and copy the <b>Application ID</b> shown near the top of the page. Paste it below and we\'ll generate a link pre-loaded with exactly the permissions your bot needs — nothing more.</p>' +
+      '<input class="field-input" style="margin-bottom:8px" placeholder="Paste Application ID here" value="' + esc(state.clientId) + '" data-field="clientId" />' +
+      '<div class="perm-list">' + permInfo.list.filter(function (p) { return p.on; }).map(function (p) { return '<div class="perm-item">' + icon('check', 12, 'var(--green)') + ' ' + esc(p.label) + '</div>'; }).join('') + '</div>' +
+      '<div id="invite-area">' + inviteAreaHTML(permInfo) + '</div>') +
+
+    stepHTML(4, 'users', 'Invite it to your server',
+      '<p>Open the invite link from step 3 (you\'ll need the <b>Manage Server</b> permission on whichever server you\'re adding it to). Discord will ask you to:</p>' +
+      '<ul>' +
+        '<li>Pick a server from the dropdown.</li>' +
+        '<li>Click <b>Continue</b>, review the list of permissions (it should match what\'s shown in step 3), then click <b>Authorize</b>.</li>' +
+        '<li>Complete the captcha if you\'re asked for one.</li>' +
+      '</ul>' +
+      '<p>Check your server\'s member list — your bot now shows up there with a gray "offline" dot. That\'s expected; it turns online once you actually run its code in the next steps.</p>') +
+
+    stepHTML(5, 'terminal', 'Set up the code on your computer',
+      '<p><b>Install Node.js</b> — download the <b>LTS</b> version from the link below for your operating system and run the installer with the default options. To check it worked, open a terminal and type <code>node -v</code>; it should print something like <code>v20.11.0</code>.</p>' +
+      '<a class="link" href="https://nodejs.org" target="_blank" rel="noopener noreferrer">nodejs.org ' + icon('external-link', 13) + '</a>' +
+      '<p style="margin-top:10px"><b>Opening a terminal</b> — on Mac, open Spotlight (⌘+Space) and search "Terminal". On Windows, search "PowerShell" or "Command Prompt" in the Start menu. If you use VS Code, its built-in terminal (menu: Terminal &gt; New Terminal) works too.</p>' +
+      '<p><b>Create a project folder</b> — make a new empty folder anywhere you like (e.g. a folder called <code>my-discord-bot</code> on your Desktop). From the <b>Files</b> tab in this builder, download all three files into it: <code>index.js</code>, <code>package.json</code>, and <code>.env.example</code> — then rename that last one to exactly <code>.env</code> (remove the <code>.example</code> part, keep the leading dot).</p>' +
+      '<p>Open <code>.env</code> in any text editor and paste your token in place of the placeholder, so the line reads:</p>' +
+      '<pre class="setup-pre">DISCORD_TOKEN=your_actual_token_here</pre>' +
+      '<p><b>Navigate your terminal into that folder.</b> Type <code>cd </code> (with a trailing space), then drag the folder from Finder/Explorer into the terminal window to auto-fill its path, and press Enter. Or on Windows, you can right-click the folder while holding Shift and choose "Open PowerShell window here".</p>' +
+      '<p>Once you\'re in the folder, install the bot\'s dependencies:</p>' +
+      '<pre class="setup-pre">npm install</pre>' +
+      '<p>This reads <code>package.json</code> and downloads the <code>discord.js</code> and <code>dotenv</code> packages into a new <code>node_modules</code> folder. It can take anywhere from a few seconds to a minute.</p>') +
+
+    stepHTML(6, 'rocket', 'Run it',
+      '<pre class="setup-pre">npm start</pre>' +
+      '<p>Your terminal should print something like <b>"✅ &lt;your bot name&gt; is online as YourBot#1234"</b>, and your bot\'s status dot in Discord should flip from gray to green. Leave this terminal window open — closing it (or pressing Ctrl+C) stops the bot.</p>' +
+      '<p><b>If something goes wrong</b>, check here first:</p>' +
+      '<ul>' +
+        '<li><code>Cannot find module \'discord.js\'</code> — you ran <code>npm start</code> before <code>npm install</code>, or you\'re in the wrong folder. Re-run <code>npm install</code> in the same folder as <code>index.js</code>.</li>' +
+        '<li><code>An invalid token was provided</code> — double-check your <code>.env</code> file: no quotes, no extra spaces, and the file is named exactly <code>.env</code> (not <code>.env.txt</code>).</li>' +
+        '<li>Bot stays offline with no errors — make sure the terminal is still open and the process hasn\'t crashed silently; scroll up in the terminal for an earlier error.</li>' +
+        '<li>Slash commands don\'t appear in Discord — give it a minute (guild commands can take a little time to show up) and fully restart your Discord app.</li>' +
+        '<li>An action like kicking, banning, or role-assigning silently fails — check that you enabled the matching intent in step 2 and that your bot\'s role in Server Settings &gt; Roles is positioned <i>above</i> the roles it needs to manage.</li>' +
+      '</ul>') +
+
+    stepHTML(7, 'zap', 'Keep it running 24/7 (optional)',
+      '<p>Right now your bot only stays online while <code>npm start</code> is running on your own computer — close the laptop and it goes offline. For a bot that\'s always available, you host the same three files on a service that keeps a Node.js process running around the clock instead of your own machine.</p>' +
+      '<p>The general pattern, using a host like Railway or Render as an example:</p>' +
+      '<ul>' +
+        '<li>Create an account on the host and start a new Node.js project, either by uploading your files directly or connecting a GitHub repository that contains them.</li>' +
+        '<li><b>Do not</b> upload your <code>.env</code> file or commit it to GitHub. Instead, add <code>DISCORD_TOKEN</code> as an environment variable / secret inside the host\'s dashboard, with your token as the value.</li>' +
+        '<li>Set the start command to <code>npm start</code> (or <code>node index.js</code>) and deploy. The host installs your dependencies automatically and keeps the process alive, restarting it if it ever crashes.</li>' +
+      '</ul>' +
+      '<p>Free tiers on these hosts are usually enough for a small personal bot; busier bots may need a paid plan.</p>') +
+
+    '<div class="feedback-card">' +
+      '<p>Found a bug, or have an idea to make this builder better?</p>' +
+      '<a class="btn btn-secondary" href="https://forms.gle/p2tzA4ghhE5sKxtL6" target="_blank" rel="noopener noreferrer">' + icon('external-link', 14) + ' Submit feedback</a>' +
+    '</div>';
+}
+
+/* ============================================================
+   MODALS
+   ============================================================ */
+function eventPickerModalHTML() {
+  const items = EVENT_ORDER.map(function (key) {
+    const def = EVENT_DEFS[key];
+    return '<button class="modal-item" data-act="add-script" data-event="' + key + '">' +
+      '<div class="icon-tag" style="background:' + def.color + '26">' + icon(def.icon, 16, def.color) + '</div>' +
+      '<div style="min-width:0"><div class="modal-item-title">' + esc(def.label) + '</div><div class="modal-item-desc">' + esc(def.desc) + '</div></div></button>';
+  }).join('');
+  return '<div class="modal-overlay" data-act="close-modal">' +
+    '<div class="modal-sheet"><div class="modal-head"><span class="modal-title">Choose a trigger</span>' +
+    '<button class="icon-btn" data-act="close-modal">' + icon('x', 18) + '</button></div>' + items + '</div></div>';
+}
+
+function blockPickerModalHTML() {
+  const script = state.scripts.filter(function (s) { return s.id === state.selectedScriptId; })[0];
+  if (!script) return '';
+  const ctx = ctxFor(script, state.variables);
+  const sections = ACTION_CATEGORIES.map(function (cat) {
+    const items = Object.keys(ACTION_DEFS).filter(function (type) { return ACTION_DEFS[type].category === cat && ACTION_DEFS[type].allowed(ctx); });
+    if (!items.length) return '';
+    const rows = items.map(function (type) {
+      const def = ACTION_DEFS[type];
+      return '<button class="modal-item" data-act="add-block" data-type="' + type + '">' +
+        '<div class="icon-tag" style="background:' + def.color + '26">' + icon(def.icon, 16, def.color) + '</div>' +
+        '<span class="modal-item-title">' + esc(def.label) + '</span></button>';
+    }).join('');
+    return '<div class="category-label">' + esc(cat) + '</div>' + rows;
+  }).join('');
+  return '<div class="modal-overlay" data-act="close-modal">' +
+    '<div class="modal-sheet"><div class="modal-head"><span class="modal-title">Add an action</span>' +
+    '<button class="icon-btn" data-act="close-modal">' + icon('x', 18) + '</button></div>' + sections + '</div></div>';
+}
+
+function variablesListHTML() {
+  return state.variables.map(function (v) {
+    return '<div style="display:flex;align-items:center;gap:8px;padding:8px;border-radius:8px;background:var(--bg-deep);border:1px solid var(--border);margin-bottom:8px">' +
+      '<input value="' + esc(v.name) + '" placeholder="name" style="flex:1;min-width:0;background:transparent;border:none;color:var(--text);font-size:14px;outline:none" data-var-id="' + v.id + '" data-field-key="name" />' +
+      '<input value="' + esc(v.value) + '" placeholder="starting value" style="flex:1;min-width:0;background:transparent;border:none;color:var(--text-muted);font-size:14px;outline:none" data-var-id="' + v.id + '" data-field-key="value" />' +
+      '<button class="icon-btn" data-act="delete-var" data-id="' + v.id + '">' + icon('x', 15) + '</button></div>';
+  }).join('');
+}
+
+function variablesModalHTML() {
+  return '<div class="modal-overlay" data-act="close-modal">' +
+    '<div class="modal-sheet"><div class="modal-head"><span class="modal-title">Variables</span>' +
+    '<button class="icon-btn" data-act="close-modal">' + icon('x', 18) + '</button></div>' +
+    '<p style="font-size:12px;color:var(--text-muted);margin:0 0 12px">Variables let your bot remember things — like a counter — while it\'s running. Use them with "Set a Variable" and "If a variable equals…" blocks.</p>' +
+    '<div id="vars-list">' + variablesListHTML() + '</div>' +
+    '<button class="btn btn-primary btn-block" data-act="add-var" style="margin-top:8px">' + icon('plus', 15) + ' Add Variable</button></div></div>';
+}
+
+/* ============================================================
+   HEADER + ROOT RENDER
+   ============================================================ */
+function headerHTML() {
+  const tabs = TABS.map(function (t) {
+    return '<button class="tab-btn ' + (state.activeTab === t.id ? 'active' : '') + '" data-act="tab" data-tab="' + t.id + '">' +
+      icon(t.icon, 15) + ' ' + esc(t.label) + (t.id === 'build' && hasWarnings() ? '<span class="tab-dot"></span>' : '') + '</button>';
+  }).join('');
+  return '<div class="server-rail"><div class="server-icon active">' + icon('bot', 17, '#fff') + '</div>' +
+    '<div class="server-icon">🎮</div><div class="server-icon">🎨</div><div class="server-icon">🎧</div><div class="server-icon">📚</div></div>' +
+    '<div class="header"><div class="header-row">' + icon('hash', 18, 'var(--text-muted)') +
+    '<input class="bot-name-input" value="' + esc(state.botName) + '" data-field="botName" placeholder="Name your bot" />' +
+    '<span class="badge badge-green">Bot Builder</span></div><div class="tabs">' + tabs + '</div></div>';
+}
+
+function render() {
+  const app = document.getElementById('app');
+  let bodyHTML = '';
+  if (state.activeTab === 'build') bodyHTML = buildTabHTML();
+  else if (state.activeTab === 'code') bodyHTML = codeTabHTML();
+  else if (state.activeTab === 'files') bodyHTML = filesTabHTML();
+  else if (state.activeTab === 'setup') bodyHTML = setupTabHTML();
+
+  let modalsHTML = '';
+  if (state.eventPickerOpen) modalsHTML += eventPickerModalHTML();
+  if (state.pickerOpen) modalsHTML += blockPickerModalHTML();
+  if (state.varsOpen) modalsHTML += variablesModalHTML();
+
+  app.innerHTML = headerHTML() + '<div class="content">' + bodyHTML + '</div>' + modalsHTML +
+    '<div class="footnote">Built with the Discord Bot Builder — a single-file HTML5 app, no build step required.</div>';
+}
+
+/* ============================================================
+   COPY / DOWNLOAD
+   ============================================================ */
+function copySourceText(which) {
+  if (which === 'code') return generateFullCode(state.scripts, state.variables, state.botName);
+  if (which === 'pkg') return generatePackageJson(state.botName);
+  if (which === 'env') return 'DISCORD_TOKEN=paste_your_bot_token_here\n';
+  if (which === 'readme') return generateReadme(state.botName, state.scripts);
+  if (which === 'invite') {
+    const cid = state.clientId.trim();
+    if (!cid) return '';
+    const permInfo = computePermissions(state.scripts);
+    return 'https://discord.com/api/oauth2/authorize?client_id=' + encodeURIComponent(cid) + '&permissions=' + permInfo.total + '&scope=bot%20applications.commands';
+  }
+  return '';
+}
+
+async function copyToClipboard(text) {
+  try {
+    await navigator.clipboard.writeText(text);
+    return true;
+  } catch (e) {
+    try {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.focus(); ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      return true;
+    } catch (e2) {
+      return false;
+    }
+  }
+}
+
+function downloadText(filename, content) {
+  const blob = new Blob([content], { type: 'text/plain' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click(); a.remove();
+  URL.revokeObjectURL(url);
+}
+
+async function handleCopy(btn) {
+  const text = copySourceText(btn.dataset.copy);
+  if (!text) return;
+  const ok = await copyToClipboard(text);
+  if (ok) {
+    const original = btn.innerHTML;
+    btn.innerHTML = icon('check', 13, '#fff') + ' Copied';
+    btn.classList.add('btn-copied');
+    setTimeout(function () { btn.innerHTML = original; btn.classList.remove('btn-copied'); }, 1400);
+  }
+}
+function handleDownload(btn) {
+  const text = copySourceText(btn.dataset.copy);
+  downloadText(btn.dataset.file, text);
+}
+
+/* ============================================================
+   FIELD CHANGE HANDLING
+   ============================================================ */
+function applyFieldChange(el) {
+  const value = el.type === 'checkbox' ? el.checked : el.value;
+
+  if (el.dataset.varId) {
+    const v = state.variables.filter(function (x) { return x.id === el.dataset.varId; })[0];
+    if (v) v[el.dataset.fieldKey] = value;
+    return;
+  }
+  if (el.dataset.field === 'botName') { state.botName = value; return; }
+  if (el.dataset.field === 'clientId') {
+    state.clientId = value;
+    const area = document.getElementById('invite-area');
+    if (area) area.innerHTML = inviteAreaHTML(computePermissions(state.scripts));
+    return;
+  }
+  if (el.dataset.fieldScript && el.dataset.fieldBlock) {
+    const script = state.scripts.filter(function (s) { return s.id === el.dataset.fieldScript; })[0];
+    const block = script && script.blocks.filter(function (b) { return b.id === el.dataset.fieldBlock; })[0];
+    if (!block) return;
+    block.config[el.dataset.fieldKey] = value;
+    const def = ACTION_DEFS[block.type];
+    if (def && def.preview) {
+      const previewEl = document.getElementById('preview-' + block.id);
+      if (previewEl) {
+        const ctx = ctxFor(script, state.variables);
+        previewEl.innerHTML = def.preview === 'message' ? messagePreviewHTML(block.config.text, ctx) : embedPreviewHTML(block.config, ctx);
+      }
+    }
+    if (el.type === 'color') {
+      const span = el.parentElement.querySelector('span');
+      if (span) span.textContent = value;
+    }
+    return;
+  }
+  if (el.dataset.fieldScript) {
+    const script = state.scripts.filter(function (s) { return s.id === el.dataset.fieldScript; })[0];
+    if (script) script.event.config[el.dataset.fieldKey] = value;
+    return;
+  }
+}
+function matchesField(el) {
+  return el.hasAttribute('data-field') || el.hasAttribute('data-field-key');
+}
+
+/* ============================================================
+   EVENT WIRING
+   ============================================================ */
+function initEvents() {
+  const app = document.getElementById('app');
+
+  app.addEventListener('click', function (e) {
+    if (e.target.classList && e.target.classList.contains('modal-overlay')) {
+      closeAllModals(); render(); return;
+    }
+    const btn = e.target.closest('[data-act]');
+    if (!btn) return;
+    const act = btn.dataset.act;
+
+    if (act === 'tab') { state.activeTab = btn.dataset.tab; render(); }
+    else if (act === 'open-event-picker') { state.eventPickerOpen = true; render(); }
+    else if (act === 'open-picker') { state.pickerOpen = true; render(); }
+    else if (act === 'open-vars') { state.varsOpen = true; render(); }
+    else if (act === 'close-modal') { closeAllModals(); render(); }
+    else if (act === 'add-script') { addScript(btn.dataset.event); render(); }
+    else if (act === 'load-template') { loadTemplate(btn.dataset.id); render(); }
+    else if (act === 'select-script') { state.selectedScriptId = btn.dataset.id; render(); }
+    else if (act === 'delete-script') { deleteScript(btn.dataset.id); render(); }
+    else if (act === 'add-block') { addBlock(btn.dataset.type); render(); }
+    else if (act === 'delete-block') { deleteBlock(btn.dataset.script, btn.dataset.block); render(); }
+    else if (act === 'move-block') { moveBlock(btn.dataset.script, btn.dataset.block, parseInt(btn.dataset.dir, 10)); render(); }
+    else if (act === 'add-var') { addVariable(); render(); }
+    else if (act === 'delete-var') { deleteVariable(btn.dataset.id); render(); }
+    else if (act === 'copy') { handleCopy(btn); }
+    else if (act === 'download') { handleDownload(btn); }
+  });
+
+  app.addEventListener('input', function (e) {
+    if (matchesField(e.target)) applyFieldChange(e.target);
+  });
+
+  app.addEventListener('change', function (e) {
+    if (matchesField(e.target)) { applyFieldChange(e.target); render(); }
+  });
+}
+
+render();
+initEvents();
+</script>
+</body>
+</html>
