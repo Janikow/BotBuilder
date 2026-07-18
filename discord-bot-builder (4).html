@@ -1,0 +1,2051 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Discord Bot Builder</title>
+<meta name="description" content="Build a working Discord bot by tapping together triggers and actions. No coding required. Generates real discord.js code and walks you through getting it live on your server." />
+<meta name="theme-color" content="#1e1f22" />
+
+<!--
+  FAVICON: drop a favicon file next to this HTML file (same folder) and point
+  the href at it. A 32x32 or 64x64 .png works everywhere; .ico and .svg are
+  also fine. apple-touch-icon is used when someone adds this page to their
+  iPhone/iPad home screen (ideally at least 180x180px).
+-->
+<link rel="icon" type="image/png" href="favicon.png" />
+<link rel="apple-touch-icon" href="favicon.png" />
+
+<!-- Social share preview (Discord, Twitter/X, Slack, etc. read these when the link is pasted) -->
+<meta property="og:title" content="Discord Bot Builder" />
+<meta property="og:description" content="Build a working Discord bot by tapping together triggers and actions. No coding required." />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary" />
+
+<!--
+  GOOGLE ADSENSE: publisher ID ca-pub-4357116898226906 is set below and on
+  every ad unit in this page. Each <ins> still has a placeholder data-ad-slot
+  number; create an ad unit for each placement in your AdSense dashboard and
+  swap in the real slot ID it gives you.
+-->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4357116898226906" crossorigin="anonymous"></script>
+<style>
+  :root {
+    --bg: #313338;
+    --bg-deep: #1e1f22;
+    --bg-side: #2b2d31;
+    --border: #3f4248;
+    --blurple: #5865F2;
+    --blurple-hover: #4752C4;
+    --green: #23a559;
+    --red: #da373c;
+    --yellow: #f0b232;
+    --text: #f2f3f5;
+    --text-normal: #dbdee1;
+    --text-muted: #949ba4;
+    --text-dim: #6d6f78;
+    --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --mono: ui-monospace, Menlo, Consolas, "Courier New", monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg-deep);
+    color: var(--text-normal);
+    font-family: var(--font);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* full-window page shell: top banner / (left rail + about + editor + right rail) / bottom banner.
+     Below 900px, the about column and the editor stack — editor first, since
+     that's what people came to use. At 900px+ they sit side by side: about
+     content on the left, the editor on the right. #app has NO max-width: it
+     always grows to fill whatever space isn't taken by the ad rails / about
+     column, so there's never dead/unstyled background showing. Readability
+     inside #app is handled a level down, by .inner-wrap and .content. */
+  .page-shell { min-height: 100vh; display: flex; flex-direction: column; }
+  .main-row { flex: 1; width: 100%; display: flex; flex-direction: column; align-items: stretch; gap: 16px; padding: 0 16px; }
+  @media (min-width: 900px) { .main-row { flex-direction: row; } }
+
+  .about-column { order: 2; flex: 1 1 380px; }
+  @media (min-width: 900px) { .about-column { order: 0; max-width: 420px; } }
+
+  #app {
+    order: 1;
+    flex: 2 1 500px;
+    width: 100%;
+    min-height: 100vh;
+    background: var(--bg);
+    display: flex;
+    flex-direction: column;
+  }
+  @media (min-width: 900px) { #app { order: 0; } }
+  .inner-wrap { max-width: 780px; margin: 0 auto; width: 100%; }
+
+  /* ad slots */
+  .ad-rail { width: 300px; flex-shrink: 0; display: none; }
+  @media (min-width: 1300px) { .ad-rail { display: block; } }
+  .ad-rail .ad-slot { position: sticky; top: 16px; }
+  .ad-slot {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    background: var(--bg-side); border: 1px dashed var(--border); border-radius: 10px;
+    padding: 10px; min-height: 90px; overflow: hidden;
+  }
+  .ad-slot-top, .ad-slot-bottom { width: 100%; max-width: 970px; margin: 12px auto; }
+  .ad-rail .ad-slot { min-height: 600px; width: 300px; }
+  .ad-label { font-size: 10px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 6px; }
+  .ins-fallback-hint { font-size: 11px; color: var(--text-dim); text-align: center; line-height: 1.5; }
+  button { font-family: var(--font); cursor: pointer; }
+  a { text-decoration: none; }
+  p { margin: 0 0 8px; }
+  code { font-family: var(--mono); }
+
+  /* server rail */
+  .server-rail { display: flex; gap: 8px; padding: 10px 12px; background: var(--bg-deep); overflow-x: auto; }
+  .server-icon { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; background: var(--bg-side); opacity: .4; transition: border-radius .18s ease, opacity .15s ease, background-color .15s ease; }
+  .server-icon:hover { opacity: .7; }
+  .server-icon.active { border-radius: 14px; background: var(--blurple); opacity: 1; }
+
+  /* header */
+  .header { padding: 12px 16px 8px; background: var(--bg-deep); border-bottom: 1px solid var(--border); box-shadow: 0 4px 12px rgba(0,0,0,.15); position: relative; z-index: 5; }
+  .header-row { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+  .bot-name-input { flex: 1; min-width: 0; background: transparent; border: none; outline: none; color: var(--text); font-size: 18px; font-weight: 700; font-family: var(--font); }
+  .badge { font-size: 11px; padding: 4px 9px; border-radius: 999px; flex-shrink: 0; font-weight: 600; }
+  .badge-green { background: rgba(35,165,89,.18); color: var(--green); }
+
+  .tabs { display: flex; gap: 4px; overflow-x: auto; }
+  .tab-btn { display: flex; align-items: center; gap: 6px; padding: 7px 12px; border-radius: 8px; font-size: 13px; font-weight: 600; border: none; background: transparent; color: var(--text-muted); flex-shrink: 0; white-space: nowrap; transition: background-color .15s ease, color .15s ease, box-shadow .15s ease; }
+  .tab-btn:not(.active):hover { background: rgba(255,255,255,.06); color: var(--text-normal); }
+  .tab-btn.active { background: var(--blurple); color: #fff; box-shadow: 0 2px 10px rgba(88,101,242,.35); }
+  .tab-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--yellow); display: inline-block; margin-left: 2px; }
+
+  .content { flex: 1; width: 100%; max-width: 780px; margin: 0 auto; padding: 12px; padding-bottom: 40px; }
+
+  /* generic cards */
+  .card { border-radius: 12px; border: 1px solid var(--border); background: var(--bg-side); overflow: hidden; margin-bottom: 10px; box-shadow: 0 1px 2px rgba(0,0,0,.2); }
+
+  .event-card { border-radius: 12px; overflow: hidden; margin-bottom: 12px; border: 1px solid; box-shadow: 0 2px 10px rgba(0,0,0,.22); }
+  .event-card-head { display: flex; gap: 8px; align-items: flex-start; padding: 10px 12px; border-left: 4px solid; }
+  .event-card-title { font-size: 14px; font-weight: 700; color: var(--text); }
+  .event-card-desc { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+  .event-card-body { padding: 12px; display: flex; flex-direction: column; gap: 10px; }
+
+  .block-card { border-radius: 12px; border: 1px solid var(--border); background: var(--bg-side); overflow: hidden; margin-bottom: 8px; box-shadow: 0 1px 3px rgba(0,0,0,.2); transition: border-color .15s ease, box-shadow .15s ease, transform .15s ease; }
+  .block-card:hover { border-color: #4a4d56; box-shadow: 0 3px 12px rgba(0,0,0,.28); }
+  .block-card-head { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-left: 4px solid; }
+  .block-card-title { flex: 1; font-size: 14px; font-weight: 600; color: var(--text); }
+  .icon-btn { background: none; border: none; padding: 5px; display: flex; color: var(--text-muted); border-radius: 6px; transition: background-color .15s ease, color .15s ease, transform .1s ease; }
+  .icon-btn:disabled { opacity: .25; }
+  .icon-btn:not(:disabled):hover { background: rgba(255,255,255,.08); color: var(--text); }
+  .icon-btn:not(:disabled):active { transform: scale(.88); }
+  .block-card-body { padding: 4px 12px 12px; display: flex; flex-direction: column; gap: 10px; }
+
+  .field-label { display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .03em; color: var(--text-muted); margin-bottom: 4px; }
+  .field-input { width: 100%; border-radius: 8px; padding: 8px 10px; font-size: 14px; background: var(--bg-deep); color: var(--text); border: 1px solid var(--border); font-family: var(--font); outline: none; transition: border-color .15s ease, box-shadow .15s ease; }
+  .field-input:hover { border-color: #4a4d56; }
+  .field-input:focus { border-color: var(--blurple); box-shadow: 0 0 0 3px rgba(88,101,242,.18); }
+  textarea.field-input { resize: vertical; min-height: 64px; }
+  select.field-input {
+    appearance: none; -webkit-appearance: none; -moz-appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23949ba4' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 10px center; background-size: 16px; padding-right: 32px; cursor: pointer;
+  }
+  .checkbox-row { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--text-normal); cursor: pointer; padding: 3px 0; }
+  .checkbox-row input { width: 16px; height: 16px; accent-color: var(--blurple); flex-shrink: 0; cursor: pointer; }
+  .color-row { display: flex; align-items: center; gap: 8px; }
+  .color-row input[type=color] { width: 40px; height: 34px; border-radius: 6px; border: 1px solid var(--border); background: transparent; padding: 2px; cursor: pointer; transition: border-color .15s ease; }
+  .color-row input[type=color]:hover { border-color: #4a4d56; }
+  .color-row span { font-size: 12px; color: var(--text-muted); }
+
+  .btn { display: flex; align-items: center; justify-content: center; gap: 6px; border: none; border-radius: 10px; font-size: 14px; font-weight: 600; padding: 10px 14px; transition: background-color .15s ease, box-shadow .15s ease, transform .1s ease, border-color .15s ease, color .15s ease; }
+  .btn:active { transform: scale(.97); }
+  .btn-primary { background: var(--blurple); color: #fff; box-shadow: 0 1px 2px rgba(0,0,0,.25); }
+  .btn-primary:hover { background: var(--blurple-hover); box-shadow: 0 4px 16px rgba(88,101,242,.4); transform: translateY(-1px); }
+  .btn-primary:active { transform: translateY(0) scale(.97); }
+  .btn-secondary { background: var(--bg-side); border: 1px solid var(--border); color: var(--text-normal); }
+  .btn-secondary:hover { background: #33363d; border-color: #4a4d56; }
+  .btn-dashed { background: transparent; border: 1px dashed var(--border); color: var(--text-muted); }
+  .btn-dashed:hover { border-color: var(--blurple); color: var(--text); background: rgba(88,101,242,.06); }
+  .btn-sm { padding: 6px 10px; font-size: 12px; border-radius: 8px; }
+  .btn-block { width: 100%; }
+  .btn-copied { background: var(--green) !important; color: #fff !important; border-color: var(--green) !important; }
+  .btn-danger-link { display: flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 600; color: var(--red); background: none; border: none; padding: 4px; border-radius: 6px; transition: background-color .15s ease; }
+  .btn-danger-link:hover { background: rgba(218,55,60,.12); }
+
+  .chip-row { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 6px; }
+  .chip { display: flex; align-items: center; gap: 6px; padding: 8px 12px; border-radius: 8px; font-size: 12px; font-weight: 600; flex-shrink: 0; border: 1px solid var(--border); background: var(--bg-side); color: var(--text-normal); white-space: nowrap; transition: border-color .15s ease, background-color .15s ease, transform .1s ease; }
+  .chip:hover { border-color: #4a4d56; transform: translateY(-1px); }
+  .chip:active { transform: translateY(0) scale(.97); }
+  .chip-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--yellow); flex-shrink: 0; }
+
+  .preview { border-radius: 10px; padding: 12px; display: flex; gap: 10px; background: var(--bg); border: 1px solid rgba(255,255,255,.04); }
+  .preview-avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--blurple); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .preview-name-row { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+  .preview-name { font-size: 14px; font-weight: 600; color: var(--text); }
+  .preview-app-badge { font-size: 9px; padding: 1px 4px; border-radius: 4px; background: var(--blurple); color: #fff; font-weight: 700; }
+  .preview-time { font-size: 11px; color: var(--text-muted); }
+  .preview-text { font-size: 14px; color: var(--text-normal); margin: 2px 0 0; white-space: pre-wrap; word-break: break-word; }
+  .preview-embed-box { border-radius: 6px; padding: 8px 12px; margin-top: 2px; border-left: 4px solid var(--blurple); background: var(--bg-side); }
+  .preview-embed-title { font-size: 14px; font-weight: 600; color: var(--text); margin: 0; }
+  .preview-embed-desc { font-size: 14px; color: var(--text-normal); margin: 6px 0 0; white-space: pre-wrap; }
+  .preview-embed-footer { font-size: 11px; color: var(--text-muted); margin: 8px 0 0; }
+  .preview-embed-image { margin-top: 8px; border-radius: 4px; background: var(--bg-deep); color: var(--text-dim); font-size: 11px; text-align: center; padding: 16px; }
+
+  .warning-banner { display: flex; gap: 8px; padding: 10px 12px; border-radius: 10px; background: rgba(240,178,50,.1); border: 1px solid rgba(240,178,50,.4); margin-bottom: 10px; }
+  .warning-text { font-size: 12px; color: var(--text); line-height: 1.5; }
+
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,.6); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+    display: flex; align-items: flex-end; justify-content: center; z-index: 50;
+    animation: overlayIn .18s ease;
+  }
+  .modal-sheet {
+    width: 100%; max-width: 480px; max-height: 85vh; overflow-y: auto; background: var(--bg-side);
+    border-radius: 16px 16px 0 0; padding: 16px; box-shadow: 0 -12px 40px rgba(0,0,0,.45);
+    animation: sheetUp .25s cubic-bezier(.16,1,.3,1);
+  }
+  @media (min-width: 640px) {
+    .modal-overlay { align-items: center; }
+    .modal-sheet { border-radius: 16px; box-shadow: 0 20px 60px rgba(0,0,0,.5); animation: sheetPop .18s cubic-bezier(.16,1,.3,1); }
+  }
+  @keyframes overlayIn { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes sheetUp { from { opacity: 0; transform: translateY(28px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes sheetPop { from { opacity: 0; transform: scale(.95) translateY(8px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+  .modal-head { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+  .modal-title { font-size: 14px; font-weight: 700; color: var(--text); flex: 1; }
+  .modal-item { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 10px; background: var(--bg-deep); border: 1px solid var(--border); width: 100%; text-align: left; margin-bottom: 8px; transition: border-color .15s ease, background-color .15s ease, transform .1s ease; }
+  .modal-item:hover { border-color: var(--blurple); background: #26282e; transform: translateX(2px); }
+  .modal-item:active { transform: scale(.98); }
+  .modal-item-title { font-size: 14px; font-weight: 600; color: var(--text); }
+  .modal-item-desc { font-size: 12px; color: var(--text-muted); margin-top: 1px; }
+  .category-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .03em; color: var(--text-muted); margin: 14px 0 6px; }
+  .category-label:first-of-type { margin-top: 0; }
+
+  .icon-tag { width: 28px; height: 28px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+
+  .code-block { border-radius: 12px; padding: 12px; font-family: var(--mono); font-size: 12px; white-space: pre; overflow: auto; background: var(--bg-deep); border: 1px solid var(--border); color: var(--text-normal); max-height: 65vh; margin: 0; box-shadow: inset 0 1px 3px rgba(0,0,0,.3); }
+
+  .file-card-head { display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; border-bottom: 1px solid var(--border); gap: 8px; flex-wrap: wrap; }
+  .file-card-name { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; color: var(--text); }
+  .file-actions { display: flex; gap: 8px; }
+  .file-preview { padding: 12px; font-family: var(--mono); font-size: 12px; color: var(--text-muted); white-space: pre; overflow: auto; max-height: 160px; margin: 0; }
+
+  .setup-step { border-radius: 12px; border: 1px solid var(--border); background: var(--bg-side); padding: 14px; margin-bottom: 10px; box-shadow: 0 1px 3px rgba(0,0,0,.2); }
+  .setup-step-head { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+  .setup-step-num { width: 24px; height: 24px; border-radius: 50%; background: var(--blurple); color: #fff; font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .setup-step-title { font-size: 14px; font-weight: 700; color: var(--text); }
+  .setup-body p { font-size: 14px; color: var(--text-normal); line-height: 1.55; }
+  .setup-body ul { margin: 0 0 8px; padding-left: 18px; }
+  .setup-body li { font-size: 14px; color: var(--text-normal); line-height: 1.55; margin-bottom: 4px; }
+  .setup-body .link { color: var(--blurple); font-weight: 600; display: inline-flex; align-items: center; gap: 5px; transition: color .15s ease; }
+  .setup-body .link:hover { color: #97a1ff; }
+  .setup-body code { color: var(--text); background: var(--bg-deep); padding: 1px 5px; border-radius: 4px; font-size: 12.5px; }
+  .feedback-card { border-radius: 12px; border: 1px solid var(--border); background: var(--bg-side); padding: 14px; margin-top: 4px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,.2); }
+  .feedback-card p { margin: 0 0 10px; }
+  .setup-pre { border-radius: 8px; padding: 8px 10px; font-family: var(--mono); font-size: 12.5px; color: var(--text-normal); background: var(--bg-deep); margin: 0 0 8px; overflow-x: auto; }
+  .perm-list { border-radius: 8px; padding: 10px; background: var(--bg-deep); border: 1px solid var(--border); margin-bottom: 8px; display: flex; flex-direction: column; gap: 5px; }
+  .perm-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-normal); }
+  .invite-row { display: flex; gap: 8px; }
+  .invite-btn { flex: 1; }
+
+  .quickstart-card { border-radius: 12px; border: 1px solid var(--border); background: var(--bg-side); padding: 16px; margin-bottom: 12px; box-shadow: 0 2px 10px rgba(0,0,0,.22); }
+  .quickstart-head { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .quickstart-head span { font-size: 14px; font-weight: 700; color: var(--text); }
+  .quickstart-desc { font-size: 12px; color: var(--text-muted); margin-bottom: 12px; }
+
+  .empty-state { text-align: center; padding: 32px 12px; font-size: 14px; color: var(--text-muted); }
+
+  /* real, static page content, not app UI. Kept outside #app so it's present
+     in the raw HTML regardless of JS execution (crawlers, ad review, etc). */
+  .site-content { max-width: 780px; margin: 0 auto; padding: 22px 16px; color: var(--text-normal); }
+  @media (min-width: 900px) {
+    .about-column {
+      background: var(--bg-side); border: 1px solid var(--border); border-radius: 12px;
+      box-shadow: 0 1px 3px rgba(0,0,0,.2); align-self: flex-start; position: sticky; top: 16px;
+      max-height: calc(100vh - 32px); overflow-y: auto;
+    }
+    .about-column .site-content { padding: 22px; }
+  }
+  .site-content h1 { font-size: 23px; font-weight: 800; color: var(--text); margin: 0 0 14px; line-height: 1.3; }
+  .site-content h2 { font-size: 18px; font-weight: 700; color: var(--text); margin: 30px 0 14px; line-height: 1.3; }
+  .site-content h2:first-child { margin-top: 0; }
+  .site-content h3 { font-size: 14.5px; font-weight: 700; color: var(--text); margin: 18px 0 6px; }
+  .site-content p { font-size: 14.5px; line-height: 1.7; color: var(--text-normal); margin: 0 0 14px; }
+  .site-content strong { color: var(--text); }
+
+  /* scrollbars: thin + themed for dark backgrounds */
+  .code-block, .file-preview, .modal-sheet, .chip-row, .tabs, .server-rail, .setup-pre {
+    scrollbar-width: thin; scrollbar-color: var(--border) transparent;
+  }
+  .code-block::-webkit-scrollbar, .file-preview::-webkit-scrollbar, .modal-sheet::-webkit-scrollbar, .setup-pre::-webkit-scrollbar { width: 8px; height: 8px; }
+  .code-block::-webkit-scrollbar-thumb, .file-preview::-webkit-scrollbar-thumb, .modal-sheet::-webkit-scrollbar-thumb, .setup-pre::-webkit-scrollbar-thumb { background: var(--border); border-radius: 8px; }
+  .code-block::-webkit-scrollbar-track, .file-preview::-webkit-scrollbar-track, .modal-sheet::-webkit-scrollbar-track, .setup-pre::-webkit-scrollbar-track { background: transparent; }
+
+  /* accessible, modern keyboard focus ring (mouse clicks don't trigger it) */
+  button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+    outline: 2px solid var(--blurple); outline-offset: 2px; border-radius: 6px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: .01ms !important; animation-iteration-count: 1 !important;
+      transition-duration: .01ms !important; scroll-behavior: auto !important;
+    }
+  }
+</style>
+</head>
+<body>
+<!--
+  All ad slots below live OUTSIDE #app on purpose. #app's contents are fully
+  rebuilt via JS (innerHTML) as you use the builder, and <script> tags never
+  execute when injected that way, so an ad unit placed inside #app would
+  silently never load. Add any further ad slots out here in the static shell,
+  not inside the app's tab content.
+-->
+<div class="page-shell">
+
+  <!-- AD SLOT: top banner. Create this ad unit in AdSense and replace data-ad-slot below with its ID. -->
+  <div class="ad-slot ad-slot-top">
+    <div class="ad-label">Advertisement</div>
+    <ins class="adsbygoogle" style="display:block;width:100%" data-ad-client="ca-pub-4357116898226906" data-ad-slot="1111111111" data-ad-format="auto" data-full-width-responsive="true"></ins>
+    <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+  </div>
+
+  <div class="main-row">
+    <aside class="ad-rail">
+      <!-- AD SLOT: left rail (desktop only, hidden under 1180px wide) -->
+      <div class="ad-slot">
+        <div class="ad-label">Advertisement</div>
+        <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-4357116898226906" data-ad-slot="2222222222" data-ad-format="auto"></ins>
+        <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+      </div>
+    </aside>
+
+    <!--
+      Real, static page content (not app UI). This exists in the raw HTML
+      whether or not JavaScript runs, so ad reviewers and crawlers see genuine
+      publisher content on this screen, not just an empty tool shell.
+    -->
+    <div class="about-column">
+      <div class="site-content">
+        <h1>Build a Discord Bot Without Writing Code</h1>
+        <p>Discord bots power a huge share of what makes a server feel alive: greeting new members, handing out roles, moderating chat, running polls, and responding to commands around the clock. Building one from scratch usually means learning JavaScript, installing Node.js, and working directly with Discord's developer API. That's a real barrier for server owners who just want their community to work better, not to become programmers.</p>
+        <p>This builder removes that barrier. Instead of writing code, you assemble your bot from two kinds of blocks: <strong>triggers</strong>, the events your bot listens for (a message being sent, a member joining, a button being clicked), and <strong>actions</strong>, what your bot does in response, like sending a reply, assigning a role, or muting someone who's breaking the rules. Chain a few of these together and you have a working feature; chain several features together and you have a complete bot.</p>
+        <p>Everything you build compiles down to real, readable JavaScript using discord.js, the same library professional Discord bot developers use. You're never locked into the builder. Download the code at any point, read it, tweak it by hand, or hand it to a developer to extend further. The Setup tab walks through the entire process of getting your bot's token, inviting it to your server, and running it, even if you've never touched a terminal before.</p>
+
+        <h2>Frequently Asked Questions</h2>
+
+        <h3>What exactly is a Discord bot?</h3>
+        <p>A Discord bot is a program that connects to your server the same way a regular member does, except it's controlled by code instead of a person. It can read messages, respond to commands, manage roles, moderate content, and react to almost anything that happens in your server, all automatically, 24 hours a day.</p>
+
+        <h3>Do I need to know how to code?</h3>
+        <p>No. Every trigger and action in this builder is configured through plain forms: dropdowns, text boxes, and toggles. The tool writes the actual JavaScript for you. That said, because the output is standard discord.js code, if you do know how to code, you can extend anything it generates by hand.</p>
+
+        <h3>Is this free to use?</h3>
+        <p>Yes, the builder itself is free. Running your bot is free too if you host it on your own computer; if you want it online permanently rather than just while your computer is on, most beginner-friendly hosts offer a free tier that's enough for a small server.</p>
+
+        <h3>What's the difference between a trigger and an action?</h3>
+        <p>A trigger is the "when": when a message is sent, when someone joins, when a button is clicked. An action is the "then": send a message, assign a role, kick a member. Every feature you build starts with exactly one trigger and can chain together as many actions as you like, including conditional logic like "if" and "repeat."</p>
+
+        <h3>Does my bot need special permissions?</h3>
+        <p>Only the permissions its actions actually use. The Setup tab calculates this automatically: if your bot only sends messages, it won't ask to manage roles or kick members. You approve the exact permission list yourself when you invite the bot to your server.</p>
+
+        <h3>Can I edit the generated code myself?</h3>
+        <p>Yes. The Code and Files tabs show the complete, unminified source: a single <code>index.js</code> file plus a <code>package.json</code>. Copy it, download it, or hand it to someone else to keep building on.</p>
+
+        <h3>What happens to my bot when I close this page?</h3>
+        <p>Nothing changes about the bot itself. This page only builds the code; it doesn't run your bot. Your bot runs wherever you deploy the generated files, on your own computer or a hosting service, completely independent of whether this builder is open.</p>
+
+        <h2>Popular Things People Build</h2>
+        <p>Most bots built here fall into a handful of categories. <strong>Moderation bots</strong> watch for rule-breaking language, let staff kick, ban, or timeout members, and log deleted messages to a mod channel. <strong>Welcome and onboarding bots</strong> greet new members by name, assign a default role automatically, and point people toward the rules or introductions channel. <strong>Reaction-role and button-role setups</strong> let members self-assign roles (pronouns, notification pings, game groups) by clicking a reaction or button instead of asking a moderator. <strong>Utility and fun commands</strong> cover everything from a simple status check to an 8-ball, a poll, or a custom slash command tailored to your community's own jokes and traditions.</p>
+      </div>
+    </div>
+
+    <div id="app"></div>
+
+    <aside class="ad-rail">
+      <!-- AD SLOT: right rail (desktop only, hidden under 1180px wide) -->
+      <div class="ad-slot">
+        <div class="ad-label">Advertisement</div>
+        <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-4357116898226906" data-ad-slot="3333333333" data-ad-format="auto"></ins>
+        <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+      </div>
+    </aside>
+  </div>
+
+  <!-- AD SLOT: bottom banner -->
+  <div class="ad-slot ad-slot-bottom">
+    <div class="ad-label">Advertisement</div>
+    <ins class="adsbygoogle" style="display:block;width:100%" data-ad-client="ca-pub-4357116898226906" data-ad-slot="4444444444" data-ad-format="auto" data-full-width-responsive="true"></ins>
+    <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+  </div>
+
+</div>
+
+<script>
+/* ============================================================
+   ICONS  (hand-drawn, Lucide-style stroke icons, no dependency)
+   ============================================================ */
+function svg(inner) {
+  return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="100%" height="100%">' + inner + '</svg>';
+}
+const ICONS = {
+  zap: svg('<path d="M13 2 4 14h6l-1 8 9-12h-6z"/>'),
+  'message-square': svg('<path d="M4 5h16v10H9l-4 4V5z"/>'),
+  terminal: svg('<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 9l3 3-3 3M13 15h4"/>'),
+  'user-plus': svg('<circle cx="9" cy="8" r="3"/><path d="M3 20c0-4 3-6 6-6s6 2 6 6"/><path d="M19 8v6M16 11h6"/>'),
+  'user-minus': svg('<circle cx="9" cy="8" r="3"/><path d="M3 20c0-4 3-6 6-6s6 2 6 6"/><path d="M16 11h6"/>'),
+  smile: svg('<circle cx="12" cy="12" r="9"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><path d="M9 9h.01M15 9h.01"/>'),
+  send: svg('<path d="M3 11l18-8-8 18-2-8-8-2z"/>'),
+  'message-circle': svg('<circle cx="12" cy="12" r="9"/><path d="M8 12h.01M12 12h.01M16 12h.01"/>'),
+  trash: svg('<path d="M4 6h16"/><path d="M9 6V4h6v2"/><path d="M6 6l1 14h10l1-14"/>'),
+  ban: svg('<circle cx="12" cy="12" r="9"/><path d="M6 6l12 12"/>'),
+  clock: svg('<circle cx="12" cy="12" r="9"/><path d="M12 7v5l4 2"/>'),
+  repeat: svg('<path d="M17 2l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 22l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/>'),
+  'git-branch': svg('<circle cx="6" cy="6" r="2.2"/><circle cx="6" cy="18" r="2.2"/><circle cx="18" cy="12" r="2.2"/><path d="M6 8.2V15.8"/><path d="M8.2 12H12a4 4 0 0 0 4-4v-.4"/>'),
+  hash: svg('<path d="M5 9h14M5 15h14M9 4L7 20M17 4l-2 16"/>'),
+  'chevron-up': svg('<path d="M6 15l6-6 6 6"/>'),
+  'chevron-down': svg('<path d="M6 9l6 6 6-6"/>'),
+  x: svg('<path d="M6 6l12 12M18 6L6 18"/>'),
+  plus: svg('<path d="M12 5v14M5 12h14"/>'),
+  rocket: svg('<path d="M12 2c3 1 5 4 5 8 0 3-2 6-5 9-3-3-5-6-5-9 0-4 2-7 5-8z"/><circle cx="12" cy="9" r="1.4" fill="currentColor" stroke="none"/><path d="M8 16l-3 5 5-2"/><path d="M16 16l3 5-5-2"/>'),
+  link: svg('<path d="M9 15l6-6"/><path d="M13 4h3a4 4 0 0 1 0 8h-2"/><path d="M11 20H8a4 4 0 0 1 0-8h2"/>'),
+  key: svg('<circle cx="8" cy="14" r="4"/><path d="M11 11l9-9"/><path d="M17 5l3 3"/><path d="M14 8l2 2"/>'),
+  'alert-triangle': svg('<path d="M12 3l10 18H2z"/><path d="M12 10v4"/><path d="M12 17h.01"/>'),
+  'external-link': svg('<path d="M9 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-4"/><path d="M14 4h6v6"/><path d="M20 4L11 13"/>'),
+  sparkles: svg('<path d="M12 3l1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5z"/><path d="M19 15l.7 2.1L22 18l-2.3.9L19 21l-.7-2.1L16 18l2.3-.9z"/>'),
+  code: svg('<path d="M8 6l-5 6 5 6"/><path d="M16 6l5 6-5 6"/>'),
+  layers: svg('<path d="M12 2l9 5-9 5-9-5 9-5z"/><path d="M3 12l9 5 9-5"/><path d="M3 17l9 5 9-5"/>'),
+  'log-out': svg('<path d="M9 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h4"/><path d="M15 8l4 4-4 4"/><path d="M19 12H9"/>'),
+  users: svg('<circle cx="8" cy="8" r="3"/><path d="M2 20c0-3.5 2.5-6 6-6s6 2.5 6 6"/><circle cx="17" cy="9" r="2.3"/><path d="M14.5 20c0-2.8 1.8-5 4.5-5"/>'),
+  'file-text': svg('<path d="M6 2h9l5 5v15H6z"/><path d="M15 2v5h5"/><path d="M9 13h6M9 17h6"/>'),
+  copy: svg('<rect x="9" y="9" width="12" height="12" rx="1"/><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/>'),
+  download: svg('<path d="M12 3v12M7 10l5 5 5-5"/><path d="M4 19h16"/>'),
+  check: svg('<path d="M5 12l5 5L20 7"/>'),
+  'chevron-right': svg('<path d="M9 6l6 6-6 6"/>'),
+  wand: svg('<path d="M5 19L19 5"/><path d="M15 3l1.5 1.5"/><path d="M19.5 7.5L21 9"/><path d="M3 15l1.5 1.5"/>'),
+  bot: svg('<rect x="5" y="9" width="14" height="10" rx="2"/><circle cx="9" cy="14" r="1.3" fill="currentColor" stroke="none"/><circle cx="15" cy="14" r="1.3" fill="currentColor" stroke="none"/><path d="M12 9V5"/><circle cx="12" cy="4" r="1.2" fill="currentColor" stroke="none"/><path d="M2 13h3M19 13h3"/>'),
+  party: svg('<path d="M4 20l3-9 9 3z"/><path d="M13 3l1 3M18 6l3 1M17 11l2 2"/>'),
+  click: svg('<path d="M4 4l7 17 2-7 7-2z"/>'),
+  pin: svg('<path d="M9 4h6l-1 5 4 3v2H6v-2l4-3-1-5z"/><path d="M12 14v6"/>'),
+  tag: svg('<path d="M3 11V4h7l10 10-7 7L3 11z"/><circle cx="7.5" cy="7.5" r="1.2" fill="currentColor" stroke="none"/>'),
+  dice: svg('<rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8" cy="8" r="1.3" fill="currentColor" stroke="none"/><circle cx="16" cy="8" r="1.3" fill="currentColor" stroke="none"/><circle cx="8" cy="16" r="1.3" fill="currentColor" stroke="none"/><circle cx="16" cy="16" r="1.3" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.3" fill="currentColor" stroke="none"/>'),
+};
+function icon(name, size, color) {
+  size = size || 16; color = color || 'currentColor';
+  return '<span style="display:inline-flex;flex-shrink:0;width:' + size + 'px;height:' + size + 'px;color:' + color + '">' + (ICONS[name] || '') + '</span>';
+}
+
+const COLORS = { blurple: '#5865F2', green: '#23a559', red: '#da373c', yellow: '#f0b232', textMuted: '#949ba4' };
+
+function esc(s) {
+  return String(s == null ? '' : s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+let __idc = 0;
+function genId(p) {
+  __idc += 1;
+  return (p || 'id') + __idc + Math.random().toString(36).slice(2, 6);
+}
+
+/* ============================================================
+   EVENT (TRIGGER) DEFINITIONS
+   ============================================================ */
+const EVENT_META = {
+  ready: { hasMessage: false, hasMember: false, hasUser: false, hasReaction: false, canReply: false, canSame: false },
+  messageCreate: { hasMessage: true, hasMember: true, hasUser: true, hasReaction: false, canReply: true, canSame: true },
+  slashCommand: { hasMessage: false, hasMember: true, hasUser: true, hasReaction: false, canReply: true, canSame: false },
+  guildMemberAdd: { hasMessage: false, hasMember: true, hasUser: true, hasReaction: false, canReply: false, canSame: false },
+  guildMemberRemove: { hasMessage: false, hasMember: true, hasUser: true, hasReaction: false, canReply: false, canSame: false },
+  messageReactionAdd: { hasMessage: false, hasMember: true, hasUser: true, hasReaction: true, canReply: false, canSame: true },
+  messageDelete: { hasMessage: true, hasMember: false, hasUser: true, hasReaction: false, canReply: false, canSame: true },
+  messageReactionRemove: { hasMessage: false, hasMember: true, hasUser: true, hasReaction: true, canReply: false, canSame: true },
+  voiceChannelJoin: { hasMessage: false, hasMember: true, hasUser: true, hasReaction: false, canReply: false, canSame: false },
+  voiceChannelLeave: { hasMessage: false, hasMember: true, hasUser: true, hasReaction: false, canReply: false, canSame: false },
+  buttonClick: { hasMessage: false, hasMember: true, hasUser: true, hasReaction: false, canReply: true, canSame: false },
+};
+
+const EVENT_DEFS = {
+  ready: {
+    label: 'Bot Starts Up', icon: 'zap', color: COLORS.green,
+    desc: 'Runs once, the moment your bot connects to Discord.',
+    fields: function () { return []; },
+  },
+  messageCreate: {
+    label: 'Message Received', icon: 'message-square', color: COLORS.blurple,
+    desc: 'Runs every time someone sends a message your bot can see.',
+    fields: function () {
+      return [
+        { key: 'filterType', label: 'Only run when the message…', type: 'select', default: 'any',
+          options: [['any', 'Is any message'], ['contains', 'Contains certain text'], ['equals', 'Exactly matches text'], ['startsWith', 'Starts with text']] },
+        { key: 'filterText', label: 'Text to match', type: 'text', default: 'good bot', placeholder: 'e.g. good bot',
+          showIf: function (c) { return c.filterType !== 'any'; } },
+        { key: 'ignoreBots', label: 'Ignore messages sent by other bots', type: 'checkbox', default: true },
+      ];
+    },
+  },
+  slashCommand: {
+    label: 'Slash Command Used', icon: 'terminal', color: COLORS.blurple,
+    desc: 'Runs when a member types your custom /command.',
+    fields: function () {
+      return [
+        { key: 'commandName', label: 'Command name', type: 'text', default: 'hello', placeholder: 'lowercase-no-spaces' },
+        { key: 'description', label: 'Shown under the command in Discord', type: 'text', default: 'Says hello back', placeholder: 'What does this command do?' },
+        { key: 'opt1Name', label: 'Option 1 name (leave blank for none)', type: 'text', default: '' },
+        { key: 'opt1Type', label: 'Option 1 type', type: 'select', default: 'string', showIf: function (c) { return !!c.opt1Name; },
+          options: [['string', 'Text'], ['integer', 'Whole number'], ['user', 'A server member']] },
+        { key: 'opt1Required', label: 'Option 1 is required', type: 'checkbox', default: false, showIf: function (c) { return !!c.opt1Name; } },
+        { key: 'opt2Name', label: 'Option 2 name (leave blank for none)', type: 'text', default: '' },
+        { key: 'opt2Type', label: 'Option 2 type', type: 'select', default: 'string', showIf: function (c) { return !!c.opt2Name; },
+          options: [['string', 'Text'], ['integer', 'Whole number'], ['user', 'A server member']] },
+        { key: 'opt2Required', label: 'Option 2 is required', type: 'checkbox', default: false, showIf: function (c) { return !!c.opt2Name; } },
+      ];
+    },
+  },
+  guildMemberAdd: {
+    label: 'Member Joins Server', icon: 'user-plus', color: COLORS.green,
+    desc: 'Runs the moment a new member joins.',
+    fields: function () { return []; },
+  },
+  guildMemberRemove: {
+    label: 'Member Leaves Server', icon: 'user-minus', color: COLORS.red,
+    desc: 'Runs when a member leaves or is removed.',
+    fields: function () { return []; },
+  },
+  messageReactionAdd: {
+    label: 'Reaction Added', icon: 'smile', color: COLORS.yellow,
+    desc: 'Runs when someone reacts to a message, great for reaction roles.',
+    fields: function () {
+      return [
+        { key: 'emojiFilter', label: 'Only react to', type: 'select', default: 'any',
+          options: [['any', 'Any emoji'], ['specific', 'One specific emoji']] },
+        { key: 'emoji', label: 'Emoji', type: 'text', default: '✅', placeholder: 'e.g. ✅', showIf: function (c) { return c.emojiFilter === 'specific'; } },
+      ];
+    },
+  },
+  messageReactionRemove: {
+    label: 'Reaction Removed', icon: 'smile', color: COLORS.textMuted,
+    desc: 'Runs when someone takes their reaction back off a message.',
+    fields: function () {
+      return [
+        { key: 'emojiFilter', label: 'Only react to', type: 'select', default: 'any',
+          options: [['any', 'Any emoji'], ['specific', 'One specific emoji']] },
+        { key: 'emoji', label: 'Emoji', type: 'text', default: '✅', placeholder: 'e.g. ✅', showIf: function (c) { return c.emojiFilter === 'specific'; } },
+      ];
+    },
+  },
+  messageDelete: {
+    label: 'Message Deleted', icon: 'trash', color: COLORS.red,
+    desc: 'Runs when a message is deleted. Handy for a mod-log channel, but only works if the message was already cached (recently sent or seen).',
+    fields: function () { return []; },
+  },
+  voiceChannelJoin: {
+    label: 'Voice Channel Joined', icon: 'user-plus', color: COLORS.green,
+    desc: 'Runs when a member joins a voice channel.',
+    fields: function () {
+      return [
+        { key: 'channelFilter', label: 'Only when joining', type: 'select', default: 'any',
+          options: [['any', 'Any voice channel'], ['specific', 'One specific channel']] },
+        { key: 'channelName', label: 'Voice channel name', type: 'text', default: 'General', showIf: function (c) { return c.channelFilter === 'specific'; } },
+      ];
+    },
+  },
+  voiceChannelLeave: {
+    label: 'Voice Channel Left', icon: 'user-minus', color: COLORS.red,
+    desc: 'Runs when a member leaves a voice channel.',
+    fields: function () {
+      return [
+        { key: 'channelFilter', label: 'Only when leaving', type: 'select', default: 'any',
+          options: [['any', 'Any voice channel'], ['specific', 'One specific channel']] },
+        { key: 'channelName', label: 'Voice channel name', type: 'text', default: 'General', showIf: function (c) { return c.channelFilter === 'specific'; } },
+      ];
+    },
+  },
+  buttonClick: {
+    label: 'Button Clicked', icon: 'click', color: COLORS.blurple,
+    desc: 'Runs when someone clicks a button your bot sent (see the "Send Buttons" action).',
+    fields: function () {
+      return [
+        { key: 'idFilter', label: 'Which button', type: 'select', default: 'any',
+          options: [['any', 'Any button'], ['specific', 'One specific button ID']] },
+        { key: 'customId', label: 'Button ID', type: 'text', default: 'my_button', showIf: function (c) { return c.idFilter === 'specific'; } },
+      ];
+    },
+  },
+};
+const EVENT_ORDER = ['ready', 'messageCreate', 'slashCommand', 'guildMemberAdd', 'guildMemberRemove', 'messageReactionAdd', 'messageReactionRemove', 'messageDelete', 'voiceChannelJoin', 'voiceChannelLeave', 'buttonClick'];
+
+/* ============================================================
+   CONTEXT / VARIABLE-INTERPOLATION HELPERS
+   ============================================================ */
+function getRefs(eventType) {
+  switch (eventType) {
+    case 'messageCreate':
+      return { userRef: 'message.author', memberRef: 'message.member', replyTarget: 'message', sameChannel: 'message.channel' };
+    case 'slashCommand':
+      return { userRef: 'interaction.user', memberRef: 'interaction.member', replyTarget: 'interaction', sameChannel: null };
+    case 'guildMemberAdd':
+      return { userRef: 'member.user', memberRef: 'member', replyTarget: null, sameChannel: null };
+    case 'guildMemberRemove':
+      return { userRef: 'member.user', memberRef: 'member', replyTarget: null, sameChannel: null };
+    case 'messageReactionAdd':
+      return { userRef: 'user', memberRef: 'member', replyTarget: null, sameChannel: 'reaction.message.channel' };
+    case 'messageReactionRemove':
+      return { userRef: 'user', memberRef: 'member', replyTarget: null, sameChannel: 'reaction.message.channel' };
+    case 'messageDelete':
+      return { userRef: 'message.author', memberRef: null, replyTarget: null, sameChannel: 'message.channel' };
+    case 'voiceChannelJoin':
+      return { userRef: 'newState.member.user', memberRef: 'newState.member', replyTarget: null, sameChannel: null };
+    case 'voiceChannelLeave':
+      return { userRef: 'oldState.member.user', memberRef: 'oldState.member', replyTarget: null, sameChannel: null };
+    case 'buttonClick':
+      return { userRef: 'interaction.user', memberRef: 'interaction.member', replyTarget: 'interaction', sameChannel: null };
+    default:
+      return {};
+  }
+}
+
+function getVarMap(eventType, eventConfig, refs, variables) {
+  const map = {};
+  if (refs.userRef) map.user = refs.userRef + '.username';
+  if (refs.memberRef || refs.userRef) map.mention = (refs.memberRef || refs.userRef) + '.toString()';
+  if (eventType === 'messageCreate') {
+    map.message = 'message.content';
+    map.channel = 'message.channel.name';
+    map.server = 'message.guild.name';
+  }
+  if (eventType === 'messageReactionAdd' || eventType === 'messageReactionRemove') {
+    map.emoji = 'reaction.emoji.name';
+    map.channel = 'reaction.message.channel.name';
+    map.server = 'reaction.message.guild.name';
+  }
+  if (eventType === 'slashCommand' || eventType === 'buttonClick') {
+    map.channel = 'interaction.channel.name';
+    map.server = 'interaction.guild.name';
+  }
+  if (eventType === 'buttonClick') {
+    map.buttonId = 'interaction.customId';
+  }
+  if (eventType === 'slashCommand') {
+    ['opt1', 'opt2'].forEach(function (k) {
+      const name = eventConfig[k + 'Name'];
+      if (name) {
+        const type = eventConfig[k + 'Type'] || 'string';
+        const getter = type === 'integer' ? 'getInteger' : type === 'user' ? 'getUser' : 'getString';
+        map['option:' + name] = 'interaction.options.' + getter + '(' + JSON.stringify(name) + ')';
+      }
+    });
+  }
+  if (eventType === 'guildMemberAdd' || eventType === 'guildMemberRemove') {
+    map.server = 'member.guild.name';
+  }
+  if (eventType === 'messageDelete') {
+    map.channel = 'message.channel.name';
+    map.server = 'message.guild.name';
+  }
+  if (eventType === 'voiceChannelJoin') {
+    map.channel = 'newState.channel.name';
+    map.server = 'newState.guild.name';
+  }
+  if (eventType === 'voiceChannelLeave') {
+    map.channel = 'oldState.channel.name';
+    map.server = 'oldState.guild.name';
+  }
+  // {{var:name}}: read back anything stored with the "Set a Variable" or "Pick Random Text" actions
+  (variables || []).forEach(function (v) {
+    if (v.name) map['var:' + v.name] = 'botVars[' + JSON.stringify(v.name) + ']';
+  });
+  return map;
+}
+
+// Produces a JS template-literal STRING (including its own backticks) that,
+// when dropped into generated code, evaluates correctly at bot runtime.
+function interpolate(str, varMap) {
+  const raw = str == null ? '' : String(str);
+  let escaped = raw.replace(/\\/g, '\\\\').replace(/`/g, '\\`').replace(/\$\{/g, '\\${');
+  escaped = escaped.replace(/\{\{\s*([\w:]+)\s*\}\}/g, function (m, key) {
+    if (Object.prototype.hasOwnProperty.call(varMap, key)) return '${' + varMap[key] + '}';
+    return '';
+  });
+  return '`' + escaped + '`';
+}
+
+function whoOptions(ctx) {
+  const selfLabel = ctx.eventType === 'messageCreate' ? 'The person who sent the message'
+    : ctx.eventType === 'slashCommand' ? 'The person who ran the command' : 'This member';
+  const opts = [['invoker', selfLabel]];
+  (ctx.userOptions || []).forEach(function (name) { opts.push(['option:' + name, 'Whoever is picked for "' + name + '"']); });
+  return opts;
+}
+
+function memberActionLine(block, refs, eventType, actionExpr) {
+  const who = block.config.targetWho || 'invoker';
+  if (who.indexOf('option:') === 0 && eventType === 'slashCommand') {
+    const optName = who.slice(7);
+    return '{ const _pickedUser = interaction.options.getUser(' + JSON.stringify(optName) + '); const targetMember = _pickedUser ? await interaction.guild.members.fetch(_pickedUser.id).catch(() => null) : null; if (targetMember) { ' + actionExpr('targetMember') + ' } }';
+  }
+  const ref = refs.memberRef || 'null';
+  return 'if (' + ref + ') { ' + actionExpr(ref) + ' }';
+}
+
+/* ============================================================
+   ACTION (BLOCK) DEFINITIONS
+   ============================================================ */
+const ACTION_DEFS = {
+  sendMessage: {
+    label: 'Send a Message', icon: 'send', color: COLORS.blurple, category: 'Messages',
+    allowed: function () { return true; },
+    getFields: function (ctx) {
+      const opts = [];
+      if (ctx.canReply) opts.push(['reply', 'Reply directly to this']);
+      if (ctx.canSame) opts.push(['same', 'This channel']);
+      opts.push(['named', 'A specific channel by name']);
+      return [
+        { key: 'target', label: 'Send to', type: 'select', default: ctx.canReply ? 'reply' : ctx.canSame ? 'same' : 'named', options: opts },
+        { key: 'channelName', label: 'Channel name', type: 'text', default: 'general', placeholder: 'general', showIf: function (c) { return c.target === 'named'; } },
+        { key: 'text', label: 'Message text', type: 'textarea', default: 'Hello {{user}}!', placeholder: 'Type your message…', interp: true },
+      ];
+    },
+    preview: 'message',
+    gen: function (block, eventType, refs, varMap) {
+      const text = interpolate(block.config.text, varMap);
+      const target = block.config.target;
+      const namedSend = '{ const ch = client.channels.cache.find((c) => c.name === ' + JSON.stringify(block.config.channelName) + ' && c.isTextBased()); if (ch) await ch.send(' + text + '); }';
+      if (eventType === 'slashCommand') {
+        return target === 'reply' ? ['await interaction.reply(' + text + ');'] : [namedSend];
+      }
+      if (target === 'reply' && refs.replyTarget) return ['await ' + refs.replyTarget + '.reply(' + text + ');'];
+      if (target === 'same' && refs.sameChannel) return ['await ' + refs.sameChannel + '.send(' + text + ');'];
+      return [namedSend];
+    },
+  },
+
+  sendEmbed: {
+    label: 'Send an Embed', icon: 'layers', color: COLORS.blurple, category: 'Messages',
+    allowed: function () { return true; },
+    getFields: function (ctx) {
+      const opts = [];
+      if (ctx.canReply) opts.push(['reply', 'Reply directly to this']);
+      if (ctx.canSame) opts.push(['same', 'This channel']);
+      opts.push(['named', 'A specific channel by name']);
+      return [
+        { key: 'target', label: 'Send to', type: 'select', default: ctx.canReply ? 'reply' : ctx.canSame ? 'same' : 'named', options: opts },
+        { key: 'channelName', label: 'Channel name', type: 'text', default: 'general', showIf: function (c) { return c.target === 'named'; } },
+        { key: 'title', label: 'Embed title', type: 'text', default: 'Announcement', interp: true },
+        { key: 'description', label: 'Embed text', type: 'textarea', default: 'Something important happened, {{user}}!', interp: true },
+        { key: 'color', label: 'Accent color', type: 'color', default: '#5865F2' },
+        { key: 'imageUrl', label: 'Image URL (optional)', type: 'text', default: '' },
+        { key: 'footer', label: 'Footer text (optional)', type: 'text', default: '', interp: true },
+      ];
+    },
+    preview: 'embed',
+    gen: function (block, eventType, refs, varMap) {
+      const c = block.config;
+      const varName = 'embed_' + block.id;
+      const parts = ['new EmbedBuilder().setColor(' + JSON.stringify(c.color || '#5865F2') + ')'];
+      if (c.title) parts.push('.setTitle(' + interpolate(c.title, varMap) + ')');
+      if (c.description) parts.push('.setDescription(' + interpolate(c.description, varMap) + ')');
+      if (c.imageUrl) parts.push('.setImage(' + JSON.stringify(c.imageUrl) + ')');
+      if (c.footer) parts.push('.setFooter({ text: ' + interpolate(c.footer, varMap) + ' })');
+      const lines = ['const ' + varName + ' = ' + parts.join('') + ';'];
+      const payload = '{ embeds: [' + varName + '] }';
+      const namedSend = '{ const ch = client.channels.cache.find((c) => c.name === ' + JSON.stringify(c.channelName) + ' && c.isTextBased()); if (ch) await ch.send(' + payload + '); }';
+      if (eventType === 'slashCommand') {
+        lines.push(c.target === 'reply' ? 'await interaction.reply(' + payload + ');' : namedSend);
+        return lines;
+      }
+      if (c.target === 'reply' && refs.replyTarget) lines.push('await ' + refs.replyTarget + '.reply(' + payload + ');');
+      else if (c.target === 'same' && refs.sameChannel) lines.push('await ' + refs.sameChannel + '.send(' + payload + ');');
+      else lines.push(namedSend);
+      return lines;
+    },
+  },
+
+  sendDM: {
+    label: 'Send a Direct Message', icon: 'message-circle', color: COLORS.blurple, category: 'Messages',
+    allowed: function (ctx) { return ctx.hasUser; },
+    getFields: function () { return [{ key: 'text', label: 'DM text', type: 'textarea', default: 'Hey {{user}}, thanks for being here!', interp: true }]; },
+    preview: 'message',
+    gen: function (block, eventType, refs, varMap) { return ['await ' + refs.userRef + '.send(' + interpolate(block.config.text, varMap) + ').catch(() => {});']; },
+  },
+
+  deleteMessage: {
+    label: 'Delete the Message', icon: 'trash', color: COLORS.red, category: 'Messages',
+    allowed: function (ctx) { return ctx.hasMessage; },
+    getFields: function () { return []; },
+    gen: function () { return ['await message.delete().catch(() => {});']; },
+  },
+
+  addReaction: {
+    label: 'React to the Message', icon: 'smile', color: COLORS.yellow, category: 'Messages',
+    allowed: function (ctx) { return ctx.hasMessage; },
+    getFields: function () { return [{ key: 'emoji', label: 'Emoji', type: 'text', default: '👍' }]; },
+    gen: function (block) { return ['await message.react(' + JSON.stringify(block.config.emoji) + ').catch(() => {});']; },
+  },
+
+  sendButtons: {
+    label: 'Send Buttons', icon: 'click', color: COLORS.blurple, category: 'Messages',
+    allowed: function () { return true; },
+    getFields: function (ctx) {
+      const opts = [];
+      if (ctx.canReply) opts.push(['reply', 'Reply directly to this']);
+      if (ctx.canSame) opts.push(['same', 'This channel']);
+      opts.push(['named', 'A specific channel by name']);
+      const styleOpts = [['primary', 'Blurple'], ['secondary', 'Gray'], ['success', 'Green'], ['danger', 'Red']];
+      return [
+        { key: 'target', label: 'Send to', type: 'select', default: ctx.canReply ? 'reply' : ctx.canSame ? 'same' : 'named', options: opts },
+        { key: 'channelName', label: 'Channel name', type: 'text', default: 'general', showIf: function (c) { return c.target === 'named'; } },
+        { key: 'text', label: 'Message text', type: 'textarea', default: 'Pick an option:', interp: true },
+        { key: 'btn1Label', label: 'Button 1 label', type: 'text', default: 'Yes' },
+        { key: 'btn1Style', label: 'Button 1 color', type: 'select', default: 'success', options: styleOpts },
+        { key: 'btn1Id', label: 'Button 1 ID', type: 'text', default: 'yes_btn', placeholder: 'used to detect the click' },
+        { key: 'btn2Label', label: 'Button 2 label (optional)', type: 'text', default: '' },
+        { key: 'btn2Style', label: 'Button 2 color', type: 'select', default: 'danger', options: styleOpts, showIf: function (c) { return !!c.btn2Label; } },
+        { key: 'btn2Id', label: 'Button 2 ID', type: 'text', default: 'no_btn', showIf: function (c) { return !!c.btn2Label; } },
+        { key: 'btn3Label', label: 'Button 3 label (optional)', type: 'text', default: '' },
+        { key: 'btn3Style', label: 'Button 3 color', type: 'select', default: 'secondary', options: styleOpts, showIf: function (c) { return !!c.btn3Label; } },
+        { key: 'btn3Id', label: 'Button 3 ID', type: 'text', default: 'maybe_btn', showIf: function (c) { return !!c.btn3Label; } },
+      ];
+    },
+    preview: 'buttons',
+    gen: function (block, eventType, refs, varMap) {
+      const c = block.config;
+      const rowVar = 'row_' + block.id;
+      const styleMap = { primary: 'ButtonStyle.Primary', secondary: 'ButtonStyle.Secondary', success: 'ButtonStyle.Success', danger: 'ButtonStyle.Danger' };
+      let btnDefs = [];
+      if (c.btn1Label) btnDefs.push({ label: c.btn1Label, style: c.btn1Style, id: c.btn1Id || 'btn_1' });
+      if (c.btn2Label) btnDefs.push({ label: c.btn2Label, style: c.btn2Style, id: c.btn2Id || 'btn_2' });
+      if (c.btn3Label) btnDefs.push({ label: c.btn3Label, style: c.btn3Style, id: c.btn3Id || 'btn_3' });
+      if (btnDefs.length === 0) btnDefs.push({ label: 'Click', style: 'primary', id: 'btn_1' });
+      const btnLines = btnDefs.map(function (b) {
+        return 'new ButtonBuilder().setCustomId(' + JSON.stringify(b.id) + ').setLabel(' + JSON.stringify(b.label) + ').setStyle(' + (styleMap[b.style] || 'ButtonStyle.Primary') + ')';
+      });
+      const lines = ['const ' + rowVar + ' = new ActionRowBuilder().addComponents(' + btnLines.join(', ') + ');'];
+      const text = interpolate(c.text, varMap);
+      const payload = '{ content: ' + text + ', components: [' + rowVar + '] }';
+      const namedSend = '{ const ch = client.channels.cache.find((c) => c.name === ' + JSON.stringify(c.channelName) + ' && c.isTextBased()); if (ch) await ch.send(' + payload + '); }';
+      if (eventType === 'slashCommand' || eventType === 'buttonClick') {
+        lines.push(c.target === 'reply' ? 'await interaction.reply(' + payload + ');' : namedSend);
+        return lines;
+      }
+      if (c.target === 'reply' && refs.replyTarget) lines.push('await ' + refs.replyTarget + '.reply(' + payload + ');');
+      else if (c.target === 'same' && refs.sameChannel) lines.push('await ' + refs.sameChannel + '.send(' + payload + ');');
+      else lines.push(namedSend);
+      return lines;
+    },
+  },
+
+  pinMessage: {
+    label: 'Pin the Message', icon: 'pin', color: COLORS.yellow, category: 'Messages',
+    allowed: function (ctx) { return ctx.hasMessage; },
+    getFields: function () { return []; },
+    gen: function () { return ['await message.pin().catch(() => {});']; },
+  },
+
+  sendTyping: {
+    label: 'Show Typing…', icon: 'message-circle', color: COLORS.textMuted, category: 'Messages',
+    allowed: function (ctx) { return ctx.canSame; },
+    getFields: function () { return []; },
+    gen: function (block, eventType, refs) { return [refs.sameChannel + '.sendTyping().catch(() => {});']; },
+  },
+
+  addRole: {
+    label: 'Give a Role', icon: 'user-plus', color: COLORS.green, category: 'Members',
+    allowed: function (ctx) { return ctx.hasMember; },
+    getFields: function (ctx) {
+      return [
+        { key: 'roleName', label: 'Role name', type: 'text', default: 'Member' },
+        { key: 'targetWho', label: 'Who', type: 'select', default: 'invoker', options: whoOptions(ctx) },
+      ];
+    },
+    gen: function (block, eventType, refs) {
+      return [memberActionLine(block, refs, eventType, function (ref) {
+        return '{ const role = ' + ref + '.guild.roles.cache.find((r) => r.name === ' + JSON.stringify(block.config.roleName) + '); if (role) await ' + ref + '.roles.add(role).catch(() => {}); }';
+      })];
+    },
+  },
+
+  removeRole: {
+    label: 'Remove a Role', icon: 'user-minus', color: COLORS.red, category: 'Members',
+    allowed: function (ctx) { return ctx.hasMember; },
+    getFields: function (ctx) {
+      return [
+        { key: 'roleName', label: 'Role name', type: 'text', default: 'Member' },
+        { key: 'targetWho', label: 'Who', type: 'select', default: 'invoker', options: whoOptions(ctx) },
+      ];
+    },
+    gen: function (block, eventType, refs) {
+      return [memberActionLine(block, refs, eventType, function (ref) {
+        return '{ const role = ' + ref + '.guild.roles.cache.find((r) => r.name === ' + JSON.stringify(block.config.roleName) + '); if (role) await ' + ref + '.roles.remove(role).catch(() => {}); }';
+      })];
+    },
+  },
+
+  setNickname: {
+    label: 'Set Nickname', icon: 'tag', color: COLORS.green, category: 'Members',
+    allowed: function (ctx) { return ctx.hasMember; },
+    getFields: function (ctx) {
+      return [
+        { key: 'nickname', label: 'New nickname', type: 'text', default: 'Verified {{user}}', interp: true },
+        { key: 'targetWho', label: 'Who', type: 'select', default: 'invoker', options: whoOptions(ctx) },
+      ];
+    },
+    gen: function (block, eventType, refs, varMap) {
+      return [memberActionLine(block, refs, eventType, function (ref) {
+        return 'await ' + ref + '.setNickname(' + interpolate(block.config.nickname, varMap) + ').catch(() => {});';
+      })];
+    },
+  },
+
+  kickMember: {
+    label: 'Kick Member', icon: 'log-out', color: COLORS.red, category: 'Moderation',
+    allowed: function (ctx) { return ctx.hasMember; },
+    getFields: function (ctx) {
+      return [
+        { key: 'reason', label: 'Reason', type: 'text', default: 'Kicked by bot' },
+        { key: 'targetWho', label: 'Who', type: 'select', default: 'invoker', options: whoOptions(ctx) },
+      ];
+    },
+    gen: function (block, eventType, refs) {
+      return [memberActionLine(block, refs, eventType, function (ref) { return 'await ' + ref + '.kick(' + JSON.stringify(block.config.reason) + ').catch(() => {});'; })];
+    },
+  },
+
+  banMember: {
+    label: 'Ban Member', icon: 'ban', color: COLORS.red, category: 'Moderation',
+    allowed: function (ctx) { return ctx.hasMember; },
+    getFields: function (ctx) {
+      return [
+        { key: 'reason', label: 'Reason', type: 'text', default: 'Banned by bot' },
+        { key: 'targetWho', label: 'Who', type: 'select', default: 'invoker', options: whoOptions(ctx) },
+      ];
+    },
+    gen: function (block, eventType, refs) {
+      return [memberActionLine(block, refs, eventType, function (ref) { return 'await ' + ref + '.ban({ reason: ' + JSON.stringify(block.config.reason) + ' }).catch(() => {});'; })];
+    },
+  },
+
+  timeoutMember: {
+    label: 'Timeout Member', icon: 'clock', color: COLORS.red, category: 'Moderation',
+    allowed: function (ctx) { return ctx.hasMember; },
+    getFields: function (ctx) {
+      return [
+        { key: 'minutes', label: 'Minutes', type: 'number', default: 10 },
+        { key: 'reason', label: 'Reason', type: 'text', default: 'Timed out by bot' },
+        { key: 'targetWho', label: 'Who', type: 'select', default: 'invoker', options: whoOptions(ctx) },
+      ];
+    },
+    gen: function (block, eventType, refs) {
+      return [memberActionLine(block, refs, eventType, function (ref) {
+        return 'await ' + ref + '.timeout(' + (Number(block.config.minutes) || 10) + ' * 60 * 1000, ' + JSON.stringify(block.config.reason) + ').catch(() => {});';
+      })];
+    },
+  },
+
+  purgeMessages: {
+    label: 'Bulk Delete Messages', icon: 'trash', color: COLORS.red, category: 'Moderation',
+    allowed: function (ctx) { return ctx.canSame; },
+    getFields: function () { return [{ key: 'count', label: 'How many recent messages (max 100)', type: 'number', default: 10 }]; },
+    gen: function (block, eventType, refs) {
+      const n = Math.max(1, Math.min(100, Number(block.config.count) || 10));
+      return [refs.sameChannel + '.bulkDelete(' + n + ', true).catch(() => {});'];
+    },
+  },
+
+  setVariable: {
+    label: 'Set a Variable', icon: 'hash', color: COLORS.textMuted, category: 'Logic',
+    allowed: function () { return true; },
+    getFields: function (ctx) {
+      return [
+        { key: 'varName', label: 'Variable', type: 'select', default: ctx.variables[0] || '', options: ctx.variables.length ? ctx.variables.map(function (v) { return [v, v]; }) : [['', 'Add a variable first ↓']] },
+        { key: 'mode', label: 'Action', type: 'select', default: 'set', options: [['set', 'Set to a value'], ['increment', 'Add 1 (for counters)']] },
+        { key: 'value', label: 'Value', type: 'text', default: '', showIf: function (c) { return c.mode === 'set'; }, interp: true },
+      ];
+    },
+    gen: function (block, eventType, refs, varMap) {
+      const name = block.config.varName;
+      if (!name) return ['// (no variable selected)'];
+      if (block.config.mode === 'increment') return ['botVars[' + JSON.stringify(name) + '] = (Number(botVars[' + JSON.stringify(name) + ']) || 0) + 1;'];
+      return ['botVars[' + JSON.stringify(name) + '] = ' + interpolate(block.config.value, varMap) + ';'];
+    },
+  },
+
+  randomChoice: {
+    label: 'Pick Random Text', icon: 'dice', color: COLORS.textMuted, category: 'Logic',
+    allowed: function () { return true; },
+    getFields: function (ctx) {
+      return [
+        { key: 'varName', label: 'Save the result in', type: 'select', default: ctx.variables[0] || '', options: ctx.variables.length ? ctx.variables.map(function (v) { return [v, v]; }) : [['', 'Add a variable first ↓']] },
+        { key: 'opt1', label: 'Option 1', type: 'text', default: 'Yes' },
+        { key: 'opt2', label: 'Option 2', type: 'text', default: 'No' },
+        { key: 'opt3', label: 'Option 3 (optional)', type: 'text', default: '' },
+        { key: 'opt4', label: 'Option 4 (optional)', type: 'text', default: '' },
+      ];
+    },
+    gen: function (block, eventType, refs, varMap) {
+      const c = block.config;
+      if (!c.varName) return ['// (no variable selected)'];
+      let opts = [c.opt1, c.opt2, c.opt3, c.opt4].filter(function (o) { return o; });
+      if (opts.length === 0) opts = ['Yes', 'No'];
+      const arr = '[' + opts.map(function (o) { return interpolate(o, varMap); }).join(', ') + ']';
+      return ['{ const _choices = ' + arr + '; botVars[' + JSON.stringify(c.varName) + '] = _choices[Math.floor(Math.random() * _choices.length)]; }'];
+    },
+  },
+
+  wait: {
+    label: 'Wait', icon: 'clock', color: COLORS.textMuted, category: 'Logic',
+    allowed: function () { return true; },
+    getFields: function () { return [{ key: 'seconds', label: 'Seconds to wait', type: 'number', default: 2 }]; },
+    gen: function (block) { return ['await new Promise((resolve) => setTimeout(resolve, ' + (Number(block.config.seconds) || 1) + ' * 1000));']; },
+  },
+
+  log: {
+    label: 'Log to Console', icon: 'terminal', color: COLORS.textMuted, category: 'Logic',
+    allowed: function () { return true; },
+    getFields: function () { return [{ key: 'text', label: 'Message to log', type: 'text', default: 'checkpoint reached', interp: true }]; },
+    gen: function (block, eventType, refs, varMap) { return ['console.log(' + interpolate(block.config.text, varMap) + ');']; },
+  },
+
+  ifStart: {
+    label: 'If…', icon: 'git-branch', color: COLORS.yellow, category: 'Logic',
+    allowed: function () { return true; },
+    getFields: function (ctx) {
+      const condOptions = [['random', 'Random chance']];
+      if (ctx.variables.length) condOptions.push(['varEquals', 'A variable equals…']);
+      if (ctx.hasMessage) { condOptions.push(['msgContains', 'Message contains text'], ['msgEquals', 'Message exactly equals'], ['msgStarts', 'Message starts with']); }
+      if (ctx.hasMember) condOptions.push(['hasRole', 'This member has a role']);
+      const fields = [{ key: 'cond', label: 'Check', type: 'select', default: condOptions[0][0], options: condOptions }];
+      fields.push({ key: 'percent', label: 'Chance (%)', type: 'number', default: 50, showIf: function (c) { return c.cond === 'random'; } });
+      if (ctx.variables.length) {
+        fields.push({ key: 'varName', label: 'Variable', type: 'select', default: ctx.variables[0], options: ctx.variables.map(function (v) { return [v, v]; }), showIf: function (c) { return c.cond === 'varEquals'; } });
+        fields.push({ key: 'varValue', label: 'Equals', type: 'text', default: '', showIf: function (c) { return c.cond === 'varEquals'; } });
+      }
+      fields.push({ key: 'text', label: 'Text', type: 'text', default: '', showIf: function (c) { return ['msgContains', 'msgEquals', 'msgStarts'].indexOf(c.cond) !== -1; } });
+      fields.push({ key: 'roleName', label: 'Role name', type: 'text', default: 'Member', showIf: function (c) { return c.cond === 'hasRole'; } });
+      return fields;
+    },
+    gen: function (block, eventType, refs) {
+      const c = block.config;
+      let expr = 'true';
+      if (c.cond === 'random') expr = 'Math.random() * 100 < ' + (Number(c.percent) || 50);
+      else if (c.cond === 'varEquals') expr = 'String(botVars[' + JSON.stringify(c.varName) + ']) === ' + JSON.stringify(c.varValue || '');
+      else if (c.cond === 'msgContains') expr = 'message.content.toLowerCase().includes(' + JSON.stringify((c.text || '').toLowerCase()) + ')';
+      else if (c.cond === 'msgEquals') expr = 'message.content.toLowerCase() === ' + JSON.stringify((c.text || '').toLowerCase());
+      else if (c.cond === 'msgStarts') expr = 'message.content.toLowerCase().startsWith(' + JSON.stringify((c.text || '').toLowerCase()) + ')';
+      else if (c.cond === 'hasRole') expr = refs.memberRef + ' && ' + refs.memberRef + '.roles.cache.some((r) => r.name === ' + JSON.stringify(c.roleName) + ')';
+      return ['if (' + expr + ') {'];
+    },
+  },
+
+  elseBlock: { label: 'Otherwise…', icon: 'git-branch', color: COLORS.yellow, category: 'Logic', allowed: function () { return true; }, getFields: function () { return []; }, gen: function () { return ['} else {']; } },
+  ifEnd: { label: 'End If', icon: 'git-branch', color: COLORS.yellow, category: 'Logic', allowed: function () { return true; }, getFields: function () { return []; }, gen: function () { return ['}']; } },
+  repeatStart: {
+    label: 'Repeat…', icon: 'repeat', color: COLORS.yellow, category: 'Logic',
+    allowed: function () { return true; },
+    getFields: function () { return [{ key: 'times', label: 'Number of times', type: 'number', default: 3 }]; },
+    gen: function (block) { return ['for (let i = 0; i < ' + (Number(block.config.times) || 3) + '; i++) {']; },
+  },
+  repeatEnd: { label: 'End Repeat', icon: 'repeat', color: COLORS.yellow, category: 'Logic', allowed: function () { return true; }, getFields: function () { return []; }, gen: function () { return ['}']; } },
+};
+
+const ACTION_CATEGORIES = ['Messages', 'Members', 'Moderation', 'Logic'];
+
+/* ============================================================
+   CONTEXT BUILDER
+   ============================================================ */
+function ctxFor(script, variables) {
+  const meta = EVENT_META[script.event.type];
+  const userOptions = [];
+  const otherOptions = [];
+  if (script.event.type === 'slashCommand') {
+    ['opt1', 'opt2'].forEach(function (k) {
+      const n = script.event.config[k + 'Name'];
+      if (n) {
+        if (script.event.config[k + 'Type'] === 'user') userOptions.push(n);
+        else otherOptions.push(n);
+      }
+    });
+  }
+  return {
+    eventType: script.event.type,
+    hasMessage: meta.hasMessage, hasMember: meta.hasMember, hasUser: meta.hasUser,
+    canReply: meta.canReply, canSame: meta.canSame,
+    userOptions: userOptions, otherOptions: otherOptions,
+    variables: variables.map(function (v) { return v.name; }).filter(Boolean),
+  };
+}
+
+/* ============================================================
+   CODE GENERATION
+   ============================================================ */
+function generateScriptBody(script, variables) {
+  const eventType = script.event.type;
+  const refs = getRefs(eventType);
+  const varMap = getVarMap(eventType, script.event.config, refs, variables);
+  let depth = 1;
+  const lines = [];
+  function push(s, d) { lines.push('  '.repeat(d === undefined ? depth : d) + s); }
+  const MEMBER_ACTION_TYPES = ['addRole', 'removeRole', 'kickMember', 'banMember', 'timeoutMember', 'setNickname'];
+
+  if (eventType === 'messageCreate') {
+    if (script.event.config.ignoreBots !== false) push('if (message.author.bot) return;');
+    const ft = script.event.config.filterType;
+    if (ft && ft !== 'any') {
+      const t = (script.event.config.filterText || '').toLowerCase();
+      if (ft === 'contains') push('if (!message.content.toLowerCase().includes(' + JSON.stringify(t) + ')) return;');
+      if (ft === 'equals') push('if (message.content.toLowerCase() !== ' + JSON.stringify(t) + ') return;');
+      if (ft === 'startsWith') push('if (!message.content.toLowerCase().startsWith(' + JSON.stringify(t) + ')) return;');
+    }
+  }
+  if (eventType === 'slashCommand') {
+    push('if (!interaction.isChatInputCommand() || interaction.commandName !== ' + JSON.stringify(script.event.config.commandName || '') + ') return;');
+  }
+  if (eventType === 'buttonClick') {
+    push('if (!interaction.isButton()) return;');
+    if (script.event.config.idFilter === 'specific') {
+      push('if (interaction.customId !== ' + JSON.stringify(script.event.config.customId || '') + ') return;');
+    }
+  }
+  if (eventType === 'messageReactionAdd' || eventType === 'messageReactionRemove') {
+    push('if (reaction.partial) { try { await reaction.fetch(); } catch { return; } }');
+    if (script.event.config.emojiFilter === 'specific') {
+      push('if (reaction.emoji.name !== ' + JSON.stringify(script.event.config.emoji || '') + ') return;');
+    }
+    push('if (user.bot) return;');
+    const needsMember = script.blocks.some(function (b) { return MEMBER_ACTION_TYPES.indexOf(b.type) !== -1; });
+    if (needsMember) {
+      push('const member = await reaction.message.guild.members.fetch(user.id).catch(() => null);');
+      push('if (!member) return;');
+    }
+  }
+  if (eventType === 'messageDelete') {
+    push('if (message.partial) return;');
+  }
+  if (eventType === 'voiceChannelJoin') {
+    push('if (!newState.channelId || oldState.channelId === newState.channelId) return;');
+    if (script.event.config.channelFilter === 'specific') {
+      push('if (newState.channel?.name !== ' + JSON.stringify(script.event.config.channelName || '') + ') return;');
+    }
+  }
+  if (eventType === 'voiceChannelLeave') {
+    push('if (!oldState.channelId || oldState.channelId === newState.channelId) return;');
+    if (script.event.config.channelFilter === 'specific') {
+      push('if (oldState.channel?.name !== ' + JSON.stringify(script.event.config.channelName || '') + ') return;');
+    }
+  }
+
+  script.blocks.forEach(function (block) {
+    const def = ACTION_DEFS[block.type];
+    if (!def) return;
+    if (block.type === 'ifEnd' || block.type === 'repeatEnd') depth = Math.max(1, depth - 1);
+    const lineDepth = block.type === 'elseBlock' ? Math.max(1, depth - 1) : depth;
+    const genLines = def.gen(block, eventType, refs, varMap);
+    genLines.forEach(function (l) { push(l, lineDepth); });
+    if (block.type === 'ifStart' || block.type === 'repeatStart') depth += 1;
+  });
+
+  return lines.join('\n');
+}
+
+function generateFullCode(scripts, variables, botName) {
+  const intents = new Set(['GatewayIntentBits.Guilds']);
+  const partialsNeeded = new Set();
+  let needsGuildMembers = false, needsReactions = false, needsMessages = false, needsVoice = false;
+  const MEMBER_ACTION_TYPES = ['addRole', 'removeRole', 'kickMember', 'banMember', 'timeoutMember', 'setNickname'];
+  scripts.forEach(function (s) {
+    if (s.event.type === 'messageCreate' || s.event.type === 'messageDelete') needsMessages = true;
+    if (s.event.type === 'messageReactionAdd' || s.event.type === 'messageReactionRemove') { needsReactions = true; needsMessages = true; }
+    if (s.event.type === 'voiceChannelJoin' || s.event.type === 'voiceChannelLeave') needsVoice = true;
+    if (['guildMemberAdd', 'guildMemberRemove'].indexOf(s.event.type) !== -1) needsGuildMembers = true;
+    s.blocks.forEach(function (b) { if (MEMBER_ACTION_TYPES.indexOf(b.type) !== -1) needsGuildMembers = true; });
+  });
+  if (needsMessages) { intents.add('GatewayIntentBits.GuildMessages'); intents.add('GatewayIntentBits.MessageContent'); partialsNeeded.add('Partials.Message'); }
+  if (needsReactions) {
+    intents.add('GatewayIntentBits.GuildMessageReactions');
+    partialsNeeded.add('Partials.Message'); partialsNeeded.add('Partials.Reaction'); partialsNeeded.add('Partials.User');
+  }
+  if (needsVoice) intents.add('GatewayIntentBits.GuildVoiceStates');
+  if (needsGuildMembers) intents.add('GatewayIntentBits.GuildMembers');
+
+  const slashScripts = scripts.filter(function (s) { return s.event.type === 'slashCommand'; });
+  const interactionOnlyScripts = scripts.filter(function (s) { return s.event.type === 'buttonClick'; });
+  const otherScripts = scripts.filter(function (s) { return ['slashCommand', 'buttonClick', 'ready'].indexOf(s.event.type) === -1; });
+  const readyScripts = scripts.filter(function (s) { return s.event.type === 'ready'; });
+
+  const slashCommandsCode = slashScripts.map(function (s) {
+    const c = s.event.config;
+    const opts = [];
+    ['opt1', 'opt2'].forEach(function (k) {
+      if (c[k + 'Name']) {
+        const typeMap = { string: 'ApplicationCommandOptionType.String', integer: 'ApplicationCommandOptionType.Integer', user: 'ApplicationCommandOptionType.User' };
+        opts.push('{ name: ' + JSON.stringify(c[k + 'Name']) + ', description: ' + JSON.stringify(c[k + 'Name']) + ', type: ' + typeMap[c[k + 'Type'] || 'string'] + ', required: ' + (!!c[k + 'Required']) + ' }');
+      }
+    });
+    return '  { name: ' + JSON.stringify(c.commandName || 'command') + ', description: ' + JSON.stringify(c.description || 'A slash command') + ', options: [' + opts.join(', ') + '] }';
+  }).join(',\n');
+
+  const listenerBlocks = slashScripts.concat(interactionOnlyScripts).concat(otherScripts).map(function (s) {
+    const t = s.event.type;
+    const evName = (t === 'slashCommand' || t === 'buttonClick') ? 'interactionCreate' :
+      (t === 'voiceChannelJoin' || t === 'voiceChannelLeave') ? 'voiceStateUpdate' : t;
+    const body = generateScriptBody(s, variables);
+    const params = (t === 'slashCommand' || t === 'buttonClick') ? 'interaction' :
+      t === 'messageCreate' ? 'message' :
+      t === 'messageDelete' ? 'message' :
+      t === 'guildMemberAdd' ? 'member' :
+      t === 'guildMemberRemove' ? 'member' :
+      (t === 'messageReactionAdd' || t === 'messageReactionRemove') ? 'reaction, user' :
+      (t === 'voiceChannelJoin' || t === 'voiceChannelLeave') ? 'oldState, newState' : '';
+    return 'client.on(' + JSON.stringify(evName) + ', async (' + params + ') => {\n' + body + '\n});';
+  }).join('\n\n');
+
+  const readyBody = readyScripts.length ? generateScriptBody(readyScripts[0], variables) : '';
+  const varsInit = variables.filter(function (v) { return v.name; }).map(function (v) { return '  ' + JSON.stringify(v.name) + ': ' + JSON.stringify(v.value || ''); }).join(',\n');
+  const readyLogLine = '  console.log(' + JSON.stringify('✅ ' + (botName || 'Bot') + ' is online as ') + ' + client.user.tag);';
+  const cmdLogLine = '    console.log(' + JSON.stringify('📋 Registered ') + ' + slashCommands.length + ' + JSON.stringify(' slash command(s).') + ');';
+  const intentsArr = Array.from(intents);
+  const partialsArr = Array.from(partialsNeeded);
+
+  return 'const { Client, GatewayIntentBits, Partials, EmbedBuilder, ApplicationCommandOptionType, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require(\'discord.js\');\n' +
+'require(\'dotenv\').config();\n\n' +
+'// Built with the Discord Bot Builder\n' +
+'const client = new Client({\n' +
+'  intents: [' + intentsArr.join(', ') + '],' + (partialsArr.length ? '\n  partials: [' + partialsArr.join(', ') + '],' : '') + '\n' +
+'});\n\n' +
+'// Variables your bot remembers while it\'s running\n' +
+'let botVars = {\n' +
+varsInit + '\n' +
+'};\n\n' +
+'const slashCommands = [\n' +
+slashCommandsCode + '\n' +
+'];\n\n' +
+'client.once(\'ready\', async () => {\n' +
+readyLogLine + '\n' +
+'  if (slashCommands.length > 0) {\n' +
+'    for (const guild of client.guilds.cache.values()) {\n' +
+'      try {\n' +
+'        await guild.commands.set(slashCommands);\n' +
+'      } catch (err) {\n' +
+'        console.error(\'Could not register commands for\', guild.name, err);\n' +
+'      }\n' +
+'    }\n' +
+cmdLogLine + '\n' +
+'  }\n' +
+readyBody + '\n' +
+'});\n\n' +
+listenerBlocks + '\n\n' +
+'client.on(\'error\', console.error);\n' +
+'client.login(process.env.DISCORD_TOKEN);\n';
+}
+
+function generatePackageJson(botName) {
+  const safeName = (botName || 'my-discord-bot').toLowerCase().replace(/[^a-z0-9-]+/g, '-').replace(/^-+|-+$/g, '') || 'my-discord-bot';
+  return JSON.stringify({
+    name: safeName, version: '1.0.0', description: 'A Discord bot built with the Discord Bot Builder',
+    main: 'index.js', type: 'commonjs', scripts: { start: 'node index.js' },
+    dependencies: { 'discord.js': '^14.14.1', dotenv: '^16.4.5' },
+  }, null, 2) + '\n';
+}
+
+function generateReadme(botName, scripts) {
+  const triggers = scripts.map(function (s) {
+    return '- **' + EVENT_DEFS[s.event.type].label + '**: ' + s.blocks.length + ' action' + (s.blocks.length === 1 ? '' : 's');
+  }).join('\n') || '- (no triggers added yet)';
+  return '# ' + (botName || 'My Discord Bot') + '\n\n' +
+'Built with the Discord Bot Builder.\n\n' +
+'## What this bot does\n' + triggers + '\n\n' +
+'## Setup\n' +
+'1. Run `npm install`\n' +
+'2. Copy `.env.example` to `.env` and paste in your bot token\n' +
+'3. Run `npm start`\n\n' +
+'See the Setup tab in the builder for the full walkthrough, including how to create your bot on Discord and invite it to your server.\n';
+}
+
+const PERMS = [
+  { key: 'base', bit: 1024 + 2048 + 65536, label: 'View Channels, Send Messages, Read Message History', always: true },
+  { key: 'embed', bit: 16384, label: 'Embed Links', when: function (u) { return u.has('sendEmbed'); } },
+  { key: 'react', bit: 64, label: 'Add Reactions', when: function (u) { return u.has('addReaction') || u.has('event:messageReactionAdd'); } },
+  { key: 'manageMsgs', bit: 8192, label: 'Manage Messages (delete/pin/purge)', when: function (u) { return u.has('deleteMessage') || u.has('pinMessage') || u.has('purgeMessages'); } },
+  { key: 'roles', bit: 268435456, label: 'Manage Roles', when: function (u) { return u.has('addRole') || u.has('removeRole'); } },
+  { key: 'nicknames', bit: 134217728, label: 'Manage Nicknames', when: function (u) { return u.has('setNickname'); } },
+  { key: 'kick', bit: 2, label: 'Kick Members', when: function (u) { return u.has('kickMember'); } },
+  { key: 'ban', bit: 4, label: 'Ban Members', when: function (u) { return u.has('banMember'); } },
+  { key: 'timeout', bit: 1099511627776, label: 'Moderate Members (timeout)', when: function (u) { return u.has('timeoutMember'); } },
+];
+
+function computePermissions(scripts) {
+  const used = new Set();
+  scripts.forEach(function (s) {
+    used.add('event:' + s.event.type);
+    s.blocks.forEach(function (b) { used.add(b.type); });
+  });
+  let total = 0;
+  const list = PERMS.map(function (p) {
+    const on = p.always || (p.when && p.when(used));
+    if (on) total += p.bit;
+    return { label: p.label, on: on };
+  });
+  return { total: total, list: list };
+}
+
+function validateScript(script) {
+  const warnings = [];
+  let ifDepth = 0, repeatDepth = 0;
+  script.blocks.forEach(function (b) {
+    if (b.type === 'ifStart') ifDepth += 1;
+    if (b.type === 'ifEnd') ifDepth = Math.max(0, ifDepth - 1);
+    if (b.type === 'repeatStart') repeatDepth += 1;
+    if (b.type === 'repeatEnd') repeatDepth = Math.max(0, repeatDepth - 1);
+  });
+  if (ifDepth !== 0) warnings.push('An "If" block is missing its matching "End If".');
+  if (repeatDepth !== 0) warnings.push('A "Repeat" block is missing its matching "End Repeat".');
+  if (script.event.type === 'slashCommand') {
+    const name = script.event.config.commandName || '';
+    if (!/^[a-z0-9_-]{1,32}$/.test(name)) warnings.push('Command name should be lowercase letters, numbers, - or _, no spaces.');
+  }
+  return warnings;
+}
+
+/* ============================================================
+   TEMPLATES
+   ============================================================ */
+const TEMPLATES = [
+  {
+    id: 'welcome', name: 'Welcome Greeter', icon: 'party',
+    desc: 'Greets new members in #welcome and gives them a role.',
+    build: function () {
+      return [{
+        id: genId('s'), event: { type: 'guildMemberAdd', config: {} },
+        blocks: [
+          { id: genId('a'), type: 'sendMessage', config: { target: 'named', channelName: 'welcome', text: 'Welcome to the server, {{mention}}! 🎉 Make yourself at home.' } },
+          { id: genId('a'), type: 'addRole', config: { roleName: 'Member', targetWho: 'invoker' } },
+        ],
+      }];
+    },
+  },
+  {
+    id: 'reactionroles', name: 'Reaction Roles', icon: 'smile',
+    desc: 'React with ✅ on a message to receive the Verified role.',
+    build: function () {
+      return [{
+        id: genId('s'), event: { type: 'messageReactionAdd', config: { emojiFilter: 'specific', emoji: '✅' } },
+        blocks: [{ id: genId('a'), type: 'addRole', config: { roleName: 'Verified', targetWho: 'invoker' } }],
+      }];
+    },
+  },
+  {
+    id: 'autoreply', name: 'Friendly Auto-Reply', icon: 'message-square',
+    desc: 'Replies whenever someone says "good bot".',
+    build: function () {
+      return [{
+        id: genId('s'), event: { type: 'messageCreate', config: { filterType: 'contains', filterText: 'good bot', ignoreBots: true } },
+        blocks: [{ id: genId('a'), type: 'sendMessage', config: { target: 'reply', text: 'Aww, thank you {{user}}! 💙' } }],
+      }];
+    },
+  },
+  {
+    id: 'ping', name: 'Ping Slash Command', icon: 'terminal',
+    desc: 'Adds a /ping command that replies "Pong!".',
+    build: function () {
+      return [{
+        id: genId('s'), event: { type: 'slashCommand', config: { commandName: 'ping', description: 'Check if the bot is online', opt1Name: '', opt2Name: '' } },
+        blocks: [{ id: genId('a'), type: 'sendMessage', config: { target: 'reply', text: '🏓 Pong! I\'m online.' } }],
+      }];
+    },
+  },
+  {
+    id: 'kickcmd', name: 'Moderation: /kick', icon: 'log-out',
+    desc: 'Adds a /kick command that targets whichever member you pick.',
+    build: function () {
+      return [{
+        id: genId('s'), event: { type: 'slashCommand', config: { commandName: 'kick', description: 'Kick a member from the server', opt1Name: 'member', opt1Type: 'user', opt1Required: true, opt2Name: '' } },
+        blocks: [
+          { id: genId('a'), type: 'kickMember', config: { reason: 'Kicked by moderator', targetWho: 'option:member' } },
+          { id: genId('a'), type: 'sendMessage', config: { target: 'reply', text: '👢 Done. That member was kicked.' } },
+        ],
+      }];
+    },
+  },
+  {
+    id: 'buttonpoll', name: 'Button Poll', icon: 'click',
+    desc: 'Say "poll" to get a Yes/No button poll; clicking a button replies to the voter.',
+    build: function () {
+      return [
+        {
+          id: genId('s'), event: { type: 'messageCreate', config: { filterType: 'contains', filterText: 'poll', ignoreBots: true } },
+          blocks: [{ id: genId('a'), type: 'sendButtons', config: { target: 'same', text: 'Vote now!', btn1Label: 'Yes', btn1Style: 'success', btn1Id: 'poll_yes', btn2Label: 'No', btn2Style: 'danger', btn2Id: 'poll_no' } }],
+        },
+        {
+          id: genId('s'), event: { type: 'buttonClick', config: { idFilter: 'any', customId: '' } },
+          blocks: [{ id: genId('a'), type: 'sendMessage', config: { target: 'reply', text: 'Thanks {{user}}, your vote was recorded! 🗳️' } }],
+        },
+      ];
+    },
+  },
+  {
+    id: 'voiceannounce', name: 'Voice Announcer', icon: 'user-plus',
+    desc: 'Posts in #general whenever someone joins a voice channel.',
+    build: function () {
+      return [{
+        id: genId('s'), event: { type: 'voiceChannelJoin', config: { channelFilter: 'any' } },
+        blocks: [{ id: genId('a'), type: 'sendMessage', config: { target: 'named', channelName: 'general', text: '🎧 {{mention}} just joined a voice channel!' } }],
+      }];
+    },
+  },
+  {
+    id: '8ball', name: 'Magic 8-Ball', icon: 'dice',
+    desc: 'Adds a /8ball command that answers your question at random.',
+    variables: [{ name: 'eightball_answer', value: '' }],
+    build: function () {
+      return [{
+        id: genId('s'), event: { type: 'slashCommand', config: { commandName: '8ball', description: 'Ask the magic 8-ball a question', opt1Name: 'question', opt1Type: 'string', opt1Required: true, opt2Name: '' } },
+        blocks: [
+          { id: genId('a'), type: 'randomChoice', config: { varName: 'eightball_answer', opt1: 'Yes, definitely.', opt2: 'Ask again later.', opt3: 'No.', opt4: 'It is certain.' } },
+          { id: genId('a'), type: 'sendMessage', config: { target: 'reply', text: '🎱 {{var:eightball_answer}}' } },
+        ],
+      }];
+    },
+  },
+];
+
+/* ============================================================
+   STATE
+   ============================================================ */
+const state = {
+  botName: 'My Bot',
+  scripts: [],
+  variables: [],
+  selectedScriptId: null,
+  activeTab: 'build',
+  pickerOpen: false,
+  eventPickerOpen: false,
+  varsOpen: false,
+  clientId: '',
+};
+
+const TABS = [
+  { id: 'build', label: 'Build', icon: 'wand' },
+  { id: 'code', label: 'Code', icon: 'code' },
+  { id: 'files', label: 'Files', icon: 'file-text' },
+  { id: 'setup', label: 'Setup', icon: 'rocket' },
+];
+
+/* ============================================================
+   STATE MUTATIONS
+   ============================================================ */
+function addScript(eventType) {
+  const config = {};
+  EVENT_DEFS[eventType].fields().forEach(function (f) { config[f.key] = f.default; });
+  const newScript = { id: genId('s'), event: { type: eventType, config: config }, blocks: [] };
+  state.scripts.push(newScript);
+  state.selectedScriptId = newScript.id;
+  state.eventPickerOpen = false;
+  state.activeTab = 'build';
+}
+function loadTemplate(id) {
+  const tpl = TEMPLATES.filter(function (t) { return t.id === id; })[0];
+  if (!tpl) return;
+  const built = tpl.build();
+  state.scripts = state.scripts.concat(built);
+  state.selectedScriptId = built[0].id;
+  (tpl.variables || []).forEach(function (v) {
+    if (!state.variables.some(function (existing) { return existing.name === v.name; })) {
+      state.variables.push({ id: genId('v'), name: v.name, value: v.value || '' });
+    }
+  });
+}
+function deleteScript(id) {
+  state.scripts = state.scripts.filter(function (s) { return s.id !== id; });
+  if (state.selectedScriptId === id) state.selectedScriptId = null;
+}
+function addBlock(type) {
+  const script = state.scripts.filter(function (s) { return s.id === state.selectedScriptId; })[0];
+  if (!script) return;
+  const ctx = ctxFor(script, state.variables);
+  const def = ACTION_DEFS[type];
+  const config = {};
+  def.getFields(ctx).forEach(function (f) { config[f.key] = f.default; });
+  script.blocks.push({ id: genId('a'), type: type, config: config });
+  state.pickerOpen = false;
+}
+function deleteBlock(scriptId, blockId) {
+  const script = state.scripts.filter(function (s) { return s.id === scriptId; })[0];
+  if (script) script.blocks = script.blocks.filter(function (b) { return b.id !== blockId; });
+}
+function moveBlock(scriptId, blockId, dir) {
+  const script = state.scripts.filter(function (s) { return s.id === scriptId; })[0];
+  if (!script) return;
+  const idx = script.blocks.findIndex(function (b) { return b.id === blockId; });
+  const newIdx = idx + dir;
+  if (newIdx < 0 || newIdx >= script.blocks.length) return;
+  const tmp = script.blocks[idx];
+  script.blocks[idx] = script.blocks[newIdx];
+  script.blocks[newIdx] = tmp;
+}
+function addVariable() {
+  state.variables.push({ id: genId('v'), name: 'counter' + (state.variables.length + 1), value: '0' });
+}
+function deleteVariable(id) {
+  state.variables = state.variables.filter(function (v) { return v.id !== id; });
+}
+function closeAllModals() {
+  state.eventPickerOpen = false;
+  state.pickerOpen = false;
+  state.varsOpen = false;
+}
+function hasWarnings() {
+  return state.scripts.some(function (s) { return validateScript(s).length > 0; });
+}
+
+/* ============================================================
+   PREVIEW RENDERING
+   ============================================================ */
+function sampleize(str, ctx) {
+  if (!str) return '';
+  const samples = { user: 'Alex', mention: '@Alex', server: 'My Server', message: 'hey everyone', channel: 'general', emoji: '✅', buttonId: 'yes_btn' };
+  (ctx.userOptions || []).forEach(function (n) { samples['option:' + n] = 'Sam'; });
+  (ctx.otherOptions || []).forEach(function (n) { samples['option:' + n] = '42'; });
+  (ctx.variables || []).forEach(function (n) { samples['var:' + n] = '(value)'; });
+  return str.replace(/\{\{\s*([\w:]+)\s*\}\}/g, function (m, k) { return samples[k] !== undefined ? samples[k] : m; });
+}
+function placeholderHint(ctx) {
+  if (!ctx) return '';
+  let keys = ['{{user}}', '{{mention}}', '{{server}}'];
+  if (ctx.hasMessage) keys = keys.concat(['{{message}}', '{{channel}}']);
+  else if (ctx.eventType === 'slashCommand' || ctx.eventType === 'buttonClick' || ctx.hasReaction) keys.push('{{channel}}');
+  if (ctx.hasReaction) keys.push('{{emoji}}');
+  if (ctx.eventType === 'buttonClick') keys.push('{{buttonId}}');
+  (ctx.userOptions || []).concat(ctx.otherOptions || []).forEach(function (n) { keys.push('{{option:' + n + '}}'); });
+  (ctx.variables || []).forEach(function (n) { keys.push('{{var:' + n + '}}'); });
+  keys = keys.filter(function (k, i) { return keys.indexOf(k) === i; });
+  return keys.join('  ');
+}
+function messagePreviewHTML(text, ctx) {
+  const sample = sampleize(text, ctx);
+  const body = sample ? esc(sample) : '<span style="font-style:italic;color:var(--text-dim)">Nothing to show yet…</span>';
+  return '<div class="preview"><div class="preview-avatar">' + icon('bot', 18, '#fff') + '</div>' +
+    '<div style="min-width:0;flex:1"><div class="preview-name-row"><span class="preview-name">Your Bot</span>' +
+    '<span class="preview-app-badge">APP</span><span class="preview-time">Today at 12:34 PM</span></div>' +
+    '<p class="preview-text">' + body + '</p></div></div>';
+}
+function embedPreviewHTML(config, ctx) {
+  const title = config.title ? '<p class="preview-embed-title">' + esc(sampleize(config.title, ctx)) + '</p>' : '';
+  const desc = config.description ? '<p class="preview-embed-desc">' + esc(sampleize(config.description, ctx)) + '</p>' : '';
+  const img = config.imageUrl ? '<div class="preview-embed-image">image preview</div>' : '';
+  const footer = config.footer ? '<p class="preview-embed-footer">' + esc(sampleize(config.footer, ctx)) + '</p>' : '';
+  return '<div class="preview"><div class="preview-avatar">' + icon('bot', 18, '#fff') + '</div>' +
+    '<div style="min-width:0;flex:1"><div class="preview-name-row"><span class="preview-name">Your Bot</span>' +
+    '<span class="preview-app-badge">APP</span></div>' +
+    '<div class="preview-embed-box" style="border-left-color:' + (config.color || '#5865F2') + '">' + title + desc + img + footer + '</div></div></div>';
+}
+function buttonsPreviewHTML(config, ctx) {
+  const sample = sampleize(config.text, ctx);
+  const body = sample ? esc(sample) : '<span style="font-style:italic;color:var(--text-dim)">Nothing to show yet…</span>';
+  const styleColors = { primary: '#5865F2', secondary: '#4e5058', success: '#23a559', danger: '#da373c' };
+  const btns = [];
+  ['btn1', 'btn2', 'btn3'].forEach(function (k) {
+    const label = config[k + 'Label'];
+    if (label) {
+      const c = styleColors[config[k + 'Style']] || styleColors.primary;
+      btns.push('<span style="display:inline-flex;align-items:center;padding:6px 14px;border-radius:6px;font-size:13px;font-weight:600;color:#fff;background:' + c + '">' + esc(label) + '</span>');
+    }
+  });
+  const btnRow = btns.length ? btns.join('') : '<span style="font-size:11px;color:var(--text-dim);font-style:italic">Add a button label above</span>';
+  return '<div class="preview"><div class="preview-avatar">' + icon('bot', 18, '#fff') + '</div>' +
+    '<div style="min-width:0;flex:1"><div class="preview-name-row"><span class="preview-name">Your Bot</span>' +
+    '<span class="preview-app-badge">APP</span><span class="preview-time">Today at 12:34 PM</span></div>' +
+    '<p class="preview-text">' + body + '</p>' +
+    '<div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">' + btnRow + '</div></div></div>';
+}
+
+/* ============================================================
+   FIELD RENDERING
+   ============================================================ */
+function fieldHTML(field, value, dataAttrs, ctx) {
+  const val = value !== undefined ? value : field.default;
+  if (field.type === 'checkbox') {
+    return '<label class="checkbox-row"><input type="checkbox" ' + (val ? 'checked' : '') + ' ' + dataAttrs + ' />' + esc(field.label) + '</label>';
+  }
+  let inputHTML = '';
+  if (field.type === 'select') {
+    const opts = (field.options || []).map(function (o) {
+      return '<option value="' + esc(o[0]) + '" ' + (String(o[0]) === String(val) ? 'selected' : '') + '>' + esc(o[1]) + '</option>';
+    }).join('');
+    inputHTML = '<select class="field-input" ' + dataAttrs + '>' + opts + '</select>';
+  } else if (field.type === 'textarea') {
+    inputHTML = '<textarea class="field-input" placeholder="' + esc(field.placeholder || '') + '" ' + dataAttrs + '>' + esc(val || '') + '</textarea>';
+  } else if (field.type === 'number') {
+    inputHTML = '<input type="number" class="field-input" value="' + esc(val) + '" ' + dataAttrs + ' />';
+  } else if (field.type === 'color') {
+    inputHTML = '<div class="color-row"><input type="color" value="' + esc(val || '#5865F2') + '" ' + dataAttrs + ' /><span>' + esc(val || '#5865F2') + '</span></div>';
+  } else {
+    inputHTML = '<input type="text" class="field-input" value="' + esc(val || '') + '" placeholder="' + esc(field.placeholder || '') + '" ' + dataAttrs + ' />';
+  }
+  const hint = (field.interp && ctx) ? '<div style="font-size:11px;color:var(--text-dim);margin-top:4px;overflow-x:auto;white-space:nowrap">' + esc(placeholderHint(ctx)) + '</div>' : '';
+  return '<div><label class="field-label">' + esc(field.label) + '</label>' + inputHTML + hint + '</div>';
+}
+
+function eventCardHTML(script) {
+  const def = EVENT_DEFS[script.event.type];
+  const fields = def.fields().filter(function (f) { return !f.showIf || f.showIf(script.event.config); });
+  const fieldsHTML = fields.map(function (f) {
+    return fieldHTML(f, script.event.config[f.key], 'data-field-script="' + script.id + '" data-field-key="' + f.key + '"');
+  }).join('');
+  return '<div class="event-card" style="border-color:' + def.color + '80">' +
+    '<div class="event-card-head" style="background:' + def.color + '1f;border-left-color:' + def.color + '">' +
+    icon(def.icon, 17, def.color) +
+    '<div><div class="event-card-title">' + esc(def.label) + '</div><div class="event-card-desc">' + esc(def.desc) + '</div></div></div>' +
+    (fieldsHTML ? '<div class="event-card-body">' + fieldsHTML + '</div>' : '') + '</div>';
+}
+
+function blockCardHTML(script, block) {
+  const def = ACTION_DEFS[block.type];
+  if (!def) return '';
+  const ctx = ctxFor(script, state.variables);
+  const allFields = def.getFields(ctx);
+  const fields = allFields.filter(function (f) { return !f.showIf || f.showIf(block.config); });
+  const idx = script.blocks.findIndex(function (b) { return b.id === block.id; });
+  const isFirst = idx === 0, isLast = idx === script.blocks.length - 1;
+  const fieldsHTML = fields.map(function (f) {
+    return fieldHTML(f, block.config[f.key], 'data-field-script="' + script.id + '" data-field-block="' + block.id + '" data-field-key="' + f.key + '"', ctx);
+  }).join('');
+  let previewHTML = '';
+  if (def.preview === 'message') previewHTML = '<div id="preview-' + block.id + '">' + messagePreviewHTML(block.config.text, ctx) + '</div>';
+  if (def.preview === 'embed') previewHTML = '<div id="preview-' + block.id + '">' + embedPreviewHTML(block.config, ctx) + '</div>';
+  if (def.preview === 'buttons') previewHTML = '<div id="preview-' + block.id + '">' + buttonsPreviewHTML(block.config, ctx) + '</div>';
+  const bodyInner = fieldsHTML + previewHTML;
+  return '<div class="block-card" id="blockcard-' + block.id + '">' +
+    '<div class="block-card-head" style="border-left-color:' + def.color + '">' +
+    icon(def.icon, 16, def.color) +
+    '<span class="block-card-title">' + esc(def.label) + '</span>' +
+    '<button class="icon-btn" data-act="move-block" data-script="' + script.id + '" data-block="' + block.id + '" data-dir="-1" aria-label="Move action up" ' + (isFirst ? 'disabled' : '') + '>' + icon('chevron-up', 15) + '</button>' +
+    '<button class="icon-btn" data-act="move-block" data-script="' + script.id + '" data-block="' + block.id + '" data-dir="1" aria-label="Move action down" ' + (isLast ? 'disabled' : '') + '>' + icon('chevron-down', 15) + '</button>' +
+    '<button class="icon-btn" data-act="delete-block" data-script="' + script.id + '" data-block="' + block.id + '" aria-label="Delete this action">' + icon('x', 15) + '</button>' +
+    '</div>' + (bodyInner ? '<div class="block-card-body">' + bodyInner + '</div>' : '') + '</div>';
+}
+
+/* ============================================================
+   TAB RENDERING
+   ============================================================ */
+function buildTabHTML() {
+  if (state.scripts.length === 0) {
+    const items = TEMPLATES.map(function (t) {
+      return '<button class="modal-item" data-act="load-template" data-id="' + t.id + '">' +
+        '<div class="icon-tag" style="background:' + COLORS.blurple + '26">' + icon(t.icon, 16, COLORS.blurple) + '</div>' +
+        '<div style="min-width:0;flex:1"><div class="modal-item-title">' + esc(t.name) + '</div><div class="modal-item-desc">' + esc(t.desc) + '</div></div>' +
+        icon('chevron-right', 16, 'var(--text-dim)') + '</button>';
+    }).join('');
+    return '<div class="quickstart-card"><div class="quickstart-head">' + icon('sparkles', 16, 'var(--blurple)') + '<span>Quick start</span></div>' +
+      '<div class="quickstart-desc">Tap a template to drop in a working feature, then tweak it. You can add more triggers any time.</div>' +
+      items + '</div>' +
+      '<button class="btn btn-dashed btn-block" data-act="open-event-picker">' + icon('plus', 16) + ' Start from scratch</button>';
+  }
+
+  const chips = state.scripts.map(function (s) {
+    const def = EVENT_DEFS[s.event.type];
+    const active = s.id === state.selectedScriptId;
+    const warn = validateScript(s).length > 0;
+    const style = active ? 'background:' + def.color + '2a;border-color:' + def.color + ';color:var(--text)' : '';
+    return '<button class="chip" data-act="select-script" data-id="' + s.id + '" style="' + style + '">' +
+      icon(def.icon, 13, def.color) + ' ' + esc(def.label) + (warn ? '<span class="chip-dot"></span>' : '') + '</button>';
+  }).join('');
+
+  const script = state.scripts.filter(function (s) { return s.id === state.selectedScriptId; })[0];
+  let selectedHTML = '<div class="empty-state">Select a trigger above, or add a new one.</div>';
+  if (script) {
+    const warnings = validateScript(script);
+    const blocksHTML = script.blocks.map(function (b) { return blockCardHTML(script, b); }).join('');
+    selectedHTML =
+      '<div style="display:flex;align-items:center;justify-content:space-between;margin:10px 0">' +
+      '<span style="font-size:12px;color:var(--text-dim)">' + script.blocks.length + ' action' + (script.blocks.length === 1 ? '' : 's') + '</span>' +
+      '<button class="btn-danger-link" data-act="delete-script" data-id="' + script.id + '">' + icon('trash', 13, 'var(--red)') + ' Delete this trigger</button>' +
+      '</div>' +
+      eventCardHTML(script) +
+      (warnings.length ? '<div class="warning-banner">' + icon('alert-triangle', 15, 'var(--yellow)') + '<div class="warning-text">' + warnings.map(function (w) { return '<div>' + esc(w) + '</div>'; }).join('') + '</div></div>' : '') +
+      '<div>' + blocksHTML + '</div>' +
+      '<button class="btn btn-primary btn-block" style="margin-top:4px" data-act="open-picker">' + icon('plus', 16) + ' Add Action</button>' +
+      '<button class="btn btn-secondary btn-block" style="margin-top:8px" data-act="open-vars">' + icon('hash', 14) + ' Variables (' + state.variables.length + ')</button>';
+  }
+
+  return '<div class="chip-row">' + chips +
+    '<button class="chip" style="border-style:dashed;background:transparent;color:var(--text-muted)" data-act="open-event-picker">' + icon('plus', 13) + ' New trigger</button></div>' +
+    selectedHTML;
+}
+
+function codeTabHTML() {
+  const code = generateFullCode(state.scripts, state.variables, state.botName);
+  const warnings = [];
+  state.scripts.forEach(function (s) { validateScript(s).forEach(function (w) { warnings.push(EVENT_DEFS[s.event.type].label + ': ' + w); }); });
+  return (warnings.length ? '<div class="warning-banner">' + icon('alert-triangle', 15, 'var(--yellow)') + '<div class="warning-text">' + warnings.map(function (w) { return '<div>' + esc(w) + '</div>'; }).join('') + '</div></div>' : '') +
+    '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">' +
+    '<span style="font-size:14px;font-weight:700;color:var(--text)">index.js</span>' +
+    '<button class="btn btn-secondary btn-sm" data-act="copy" data-copy="code">' + icon('copy', 13) + ' Copy</button></div>' +
+    '<pre class="code-block">' + esc(code) + '</pre>';
+}
+
+function filesTabHTML() {
+  const code = generateFullCode(state.scripts, state.variables, state.botName);
+  const pkg = generatePackageJson(state.botName);
+  const env = 'DISCORD_TOKEN=paste_your_bot_token_here\n';
+  const readme = generateReadme(state.botName, state.scripts);
+  const files = [
+    { name: 'index.js', content: code, key: 'code' },
+    { name: 'package.json', content: pkg, key: 'pkg' },
+    { name: '.env.example', content: env, key: 'env' },
+    { name: 'README.md', content: readme, key: 'readme' },
+  ];
+  return files.map(function (f) {
+    const preview = f.content.length > 600 ? f.content.slice(0, 600) + '\n…' : f.content;
+    return '<div class="card"><div class="file-card-head"><div class="file-card-name">' + icon('file-text', 15, 'var(--blurple)') + ' ' + esc(f.name) + '</div>' +
+      '<div class="file-actions"><button class="btn btn-secondary btn-sm" data-act="copy" data-copy="' + f.key + '">' + icon('copy', 13) + ' Copy</button>' +
+      '<button class="btn btn-secondary btn-sm" data-act="download" data-copy="' + f.key + '" data-file="' + esc(f.name) + '">' + icon('download', 13) + ' Download</button></div></div>' +
+      '<pre class="file-preview">' + esc(preview) + '</pre></div>';
+  }).join('');
+}
+
+function stepHTML(n, iconName, title, bodyHTML) {
+  return '<div class="setup-step"><div class="setup-step-head"><div class="setup-step-num">' + n + '</div>' +
+    icon(iconName, 15, 'var(--text-muted)') + '<span class="setup-step-title">' + esc(title) + '</span></div>' +
+    '<div class="setup-body">' + bodyHTML + '</div></div>';
+}
+
+function inviteAreaHTML(permInfo) {
+  const cid = state.clientId.trim();
+  if (!cid) return '<p style="font-size:12px;font-style:italic;color:var(--text-dim)">Paste your Application ID above to generate the link.</p>';
+  const url = 'https://discord.com/api/oauth2/authorize?client_id=' + encodeURIComponent(cid) + '&permissions=' + permInfo.total + '&scope=bot%20applications.commands';
+  return '<div class="invite-row"><a class="btn btn-primary invite-btn" href="' + esc(url) + '" target="_blank" rel="noopener noreferrer">Open Invite Link ' + icon('external-link', 13, '#fff') + '</a>' +
+    '<button class="btn btn-secondary btn-sm" data-act="copy" data-copy="invite">' + icon('copy', 13) + ' Copy link</button></div>';
+}
+
+function setupTabHTML() {
+  const needsMessageContent = state.scripts.some(function (s) { return s.event.type === 'messageCreate'; });
+  const needsMembers = state.scripts.some(function (s) { return ['guildMemberAdd', 'guildMemberRemove'].indexOf(s.event.type) !== -1; }) ||
+    state.scripts.some(function (s) { return s.blocks.some(function (b) { return ['addRole', 'removeRole', 'kickMember', 'banMember', 'timeoutMember', 'setNickname'].indexOf(b.type) !== -1; }); });
+  const permInfo = computePermissions(state.scripts);
+  let intentsList = '';
+  if (needsMessageContent) intentsList += '<li><b>Message Content Intent</b>: lets your bot read the text of messages (needed for "Message Received" triggers and any text-matching If blocks).</li>';
+  if (needsMembers) intentsList += '<li><b>Server Members Intent</b>: lets your bot see the full member list and manage roles/kicks/bans/timeouts.</li>';
+  const intentsBlock = (needsMessageContent || needsMembers)
+    ? '<ul>' + intentsList + '</ul>'
+    : '<p style="font-style:italic;color:var(--text-dim)">Your current build doesn\'t need any privileged intents yet. You can skip this toggle for now and come back if you add message-reading or member-management features later.</p>';
+
+  return stepHTML(1, 'bot', 'Create your bot application',
+      '<p>Go to the Discord Developer Portal (sign in with your normal Discord account first if it asks). Click the <b>New Application</b> button in the top-right corner.</p>' +
+      '<p>Type a name for your bot and accept the Developer Terms of Service, then click <b>Create</b>. The name you pick becomes your bot\'s default username in Discord. You can change it later, or add an icon, from the <b>General Information</b> page you land on.</p>' +
+      '<a class="link" href="https://discord.com/developers/applications" target="_blank" rel="noopener noreferrer">discord.com/developers/applications ' + icon('external-link', 13) + '</a>') +
+
+    stepHTML(2, 'key', 'Get your token &amp; turn on intents',
+      '<p>In the left-hand sidebar of your application, click <b>Bot</b>.</p>' +
+      '<ul>' +
+        '<li>Click <b>Reset Token</b>, confirm, and Discord will show you a long string. That\'s your bot\'s token. Click to copy it.</li>' +
+        '<li>Treat this token like a password: anyone who has it can fully control your bot. Never post it in Discord, commit it to GitHub, or paste it in a screenshot. It only ever goes in your <code>.env</code> file (step 5). If you ever think it\'s leaked, come back here and hit <b>Reset Token</b> again to invalidate the old one.</li>' +
+      '</ul>' +
+      '<p>On that same Bot page, scroll down to <b>Privileged Gateway Intents</b> and turn on whichever of these your build uses:</p>' +
+      intentsBlock) +
+
+    stepHTML(3, 'link', 'Build your invite link',
+      '<p>Go back to <b>General Information</b> at the top of the sidebar and copy the <b>Application ID</b> shown near the top of the page. Paste it below and we\'ll generate a link pre-loaded with exactly the permissions your bot needs, nothing more.</p>' +
+      '<input class="field-input" style="margin-bottom:8px" placeholder="Paste Application ID here" aria-label="Discord Application ID" value="' + esc(state.clientId) + '" data-field="clientId" />' +
+      '<div class="perm-list">' + permInfo.list.filter(function (p) { return p.on; }).map(function (p) { return '<div class="perm-item">' + icon('check', 12, 'var(--green)') + ' ' + esc(p.label) + '</div>'; }).join('') + '</div>' +
+      '<div id="invite-area">' + inviteAreaHTML(permInfo) + '</div>') +
+
+    stepHTML(4, 'users', 'Invite it to your server',
+      '<p>Open the invite link from step 3 (you\'ll need the <b>Manage Server</b> permission on whichever server you\'re adding it to). Discord will ask you to:</p>' +
+      '<ul>' +
+        '<li>Pick a server from the dropdown.</li>' +
+        '<li>Click <b>Continue</b>, review the list of permissions (it should match what\'s shown in step 3), then click <b>Authorize</b>.</li>' +
+        '<li>Complete the captcha if you\'re asked for one.</li>' +
+      '</ul>' +
+      '<p>Check your server\'s member list: your bot now shows up there with a gray "offline" dot. That\'s expected; it turns online once you actually run its code in the next steps.</p>') +
+
+    stepHTML(5, 'terminal', 'Set up the code on your computer',
+      '<p><b>Install Node.js</b>: download the <b>LTS</b> version from the link below for your operating system and run the installer with the default options. To check it worked, open a terminal and type <code>node -v</code>; it should print something like <code>v20.11.0</code>.</p>' +
+      '<a class="link" href="https://nodejs.org" target="_blank" rel="noopener noreferrer">nodejs.org ' + icon('external-link', 13) + '</a>' +
+      '<p style="margin-top:10px"><b>Opening a terminal</b>: on Mac, open Spotlight (⌘+Space) and search "Terminal". On Windows, search "PowerShell" or "Command Prompt" in the Start menu. If you use VS Code, its built-in terminal (menu: Terminal &gt; New Terminal) works too.</p>' +
+      '<p><b>Create a project folder</b>: make a new empty folder anywhere you like (e.g. a folder called <code>my-discord-bot</code> on your Desktop). From the <b>Files</b> tab in this builder, download all three files into it: <code>index.js</code>, <code>package.json</code>, and <code>.env.example</code>, then rename that last one to exactly <code>.env</code> (remove the <code>.example</code> part, keep the leading dot).</p>' +
+      '<p>Open <code>.env</code> in any text editor and paste your token in place of the placeholder, so the line reads:</p>' +
+      '<pre class="setup-pre">DISCORD_TOKEN=your_actual_token_here</pre>' +
+      '<p><b>Navigate your terminal into that folder.</b> Type <code>cd </code> (with a trailing space), then drag the folder from Finder/Explorer into the terminal window to auto-fill its path, and press Enter. Or on Windows, you can right-click the folder while holding Shift and choose "Open PowerShell window here".</p>' +
+      '<p>Once you\'re in the folder, install the bot\'s dependencies:</p>' +
+      '<pre class="setup-pre">npm install</pre>' +
+      '<p>This reads <code>package.json</code> and downloads the <code>discord.js</code> and <code>dotenv</code> packages into a new <code>node_modules</code> folder. It can take anywhere from a few seconds to a minute.</p>') +
+
+    stepHTML(6, 'rocket', 'Run it',
+      '<pre class="setup-pre">npm start</pre>' +
+      '<p>Your terminal should print something like <b>"✅ &lt;your bot name&gt; is online as YourBot#1234"</b>, and your bot\'s status dot in Discord should flip from gray to green. Leave this terminal window open; closing it (or pressing Ctrl+C) stops the bot.</p>' +
+      '<p><b>If something goes wrong</b>, check here first:</p>' +
+      '<ul>' +
+        '<li><code>Cannot find module \'discord.js\'</code>: you ran <code>npm start</code> before <code>npm install</code>, or you\'re in the wrong folder. Re-run <code>npm install</code> in the same folder as <code>index.js</code>.</li>' +
+        '<li><code>An invalid token was provided</code>: double-check your <code>.env</code> file: no quotes, no extra spaces, and the file is named exactly <code>.env</code> (not <code>.env.txt</code>).</li>' +
+        '<li>Bot stays offline with no errors: make sure the terminal is still open and the process hasn\'t crashed silently; scroll up in the terminal for an earlier error.</li>' +
+        '<li>Slash commands don\'t appear in Discord: give it a minute (guild commands can take a little time to show up) and fully restart your Discord app.</li>' +
+        '<li>An action like kicking, banning, or role-assigning silently fails: check that you enabled the matching intent in step 2 and that your bot\'s role in Server Settings &gt; Roles is positioned <i>above</i> the roles it needs to manage.</li>' +
+      '</ul>') +
+
+    stepHTML(7, 'zap', 'Keep it running 24/7 (optional)',
+      '<p>Right now your bot only stays online while <code>npm start</code> is running on your own computer. Close the laptop and it goes offline. For a bot that\'s always available, you host the same three files on a service that keeps a Node.js process running around the clock instead of your own machine.</p>' +
+      '<p>The general pattern, using a host like Railway or Render as an example:</p>' +
+      '<ul>' +
+        '<li>Create an account on the host and start a new Node.js project, either by uploading your files directly or connecting a GitHub repository that contains them.</li>' +
+        '<li><b>Do not</b> upload your <code>.env</code> file or commit it to GitHub. Instead, add <code>DISCORD_TOKEN</code> as an environment variable / secret inside the host\'s dashboard, with your token as the value.</li>' +
+        '<li>Set the start command to <code>npm start</code> (or <code>node index.js</code>) and deploy. The host installs your dependencies automatically and keeps the process alive, restarting it if it ever crashes.</li>' +
+      '</ul>' +
+      '<p>Free tiers on these hosts are usually enough for a small personal bot; busier bots may need a paid plan.</p>') +
+
+    '<div class="feedback-card">' +
+      '<p>Found a bug, or have an idea to make this builder better?</p>' +
+      '<a class="btn btn-secondary" href="https://forms.gle/p2tzA4ghhE5sKxtL6" target="_blank" rel="noopener noreferrer">' + icon('external-link', 14) + ' Submit feedback</a>' +
+    '</div>';
+}
+
+/* ============================================================
+   MODALS
+   ============================================================ */
+function eventPickerModalHTML() {
+  const items = EVENT_ORDER.map(function (key) {
+    const def = EVENT_DEFS[key];
+    return '<button class="modal-item" data-act="add-script" data-event="' + key + '">' +
+      '<div class="icon-tag" style="background:' + def.color + '26">' + icon(def.icon, 16, def.color) + '</div>' +
+      '<div style="min-width:0"><div class="modal-item-title">' + esc(def.label) + '</div><div class="modal-item-desc">' + esc(def.desc) + '</div></div></button>';
+  }).join('');
+  return '<div class="modal-overlay" data-act="close-modal">' +
+    '<div class="modal-sheet"><div class="modal-head"><span class="modal-title">Choose a trigger</span>' +
+    '<button class="icon-btn" data-act="close-modal" aria-label="Close">' + icon('x', 18) + '</button></div>' + items + '</div></div>';
+}
+
+function blockPickerModalHTML() {
+  const script = state.scripts.filter(function (s) { return s.id === state.selectedScriptId; })[0];
+  if (!script) return '';
+  const ctx = ctxFor(script, state.variables);
+  const sections = ACTION_CATEGORIES.map(function (cat) {
+    const items = Object.keys(ACTION_DEFS).filter(function (type) { return ACTION_DEFS[type].category === cat && ACTION_DEFS[type].allowed(ctx); });
+    if (!items.length) return '';
+    const rows = items.map(function (type) {
+      const def = ACTION_DEFS[type];
+      return '<button class="modal-item" data-act="add-block" data-type="' + type + '">' +
+        '<div class="icon-tag" style="background:' + def.color + '26">' + icon(def.icon, 16, def.color) + '</div>' +
+        '<span class="modal-item-title">' + esc(def.label) + '</span></button>';
+    }).join('');
+    return '<div class="category-label">' + esc(cat) + '</div>' + rows;
+  }).join('');
+  return '<div class="modal-overlay" data-act="close-modal">' +
+    '<div class="modal-sheet"><div class="modal-head"><span class="modal-title">Add an action</span>' +
+    '<button class="icon-btn" data-act="close-modal" aria-label="Close">' + icon('x', 18) + '</button></div>' + sections + '</div></div>';
+}
+
+function variablesListHTML() {
+  return state.variables.map(function (v) {
+    return '<div style="display:flex;align-items:center;gap:8px;padding:8px;border-radius:8px;background:var(--bg-deep);border:1px solid var(--border);margin-bottom:8px">' +
+      '<input value="' + esc(v.name) + '" placeholder="name" style="flex:1;min-width:0;background:transparent;border:none;color:var(--text);font-size:14px;outline:none" data-var-id="' + v.id + '" data-field-key="name" />' +
+      '<input value="' + esc(v.value) + '" placeholder="starting value" style="flex:1;min-width:0;background:transparent;border:none;color:var(--text-muted);font-size:14px;outline:none" data-var-id="' + v.id + '" data-field-key="value" />' +
+      '<button class="icon-btn" data-act="delete-var" data-id="' + v.id + '" aria-label="Delete this variable">' + icon('x', 15) + '</button></div>';
+  }).join('');
+}
+
+function variablesModalHTML() {
+  return '<div class="modal-overlay" data-act="close-modal">' +
+    '<div class="modal-sheet"><div class="modal-head"><span class="modal-title">Variables</span>' +
+    '<button class="icon-btn" data-act="close-modal" aria-label="Close">' + icon('x', 18) + '</button></div>' +
+    '<p style="font-size:12px;color:var(--text-muted);margin:0 0 12px">Variables let your bot remember things (like a counter) while it\'s running. Use them with "Set a Variable" and "If a variable equals…" blocks.</p>' +
+    '<div id="vars-list">' + variablesListHTML() + '</div>' +
+    '<button class="btn btn-primary btn-block" data-act="add-var" style="margin-top:8px">' + icon('plus', 15) + ' Add Variable</button></div></div>';
+}
+
+/* ============================================================
+   HEADER + ROOT RENDER
+   ============================================================ */
+function headerHTML() {
+  const tabs = TABS.map(function (t) {
+    return '<button class="tab-btn ' + (state.activeTab === t.id ? 'active' : '') + '" data-act="tab" data-tab="' + t.id + '">' +
+      icon(t.icon, 15) + ' ' + esc(t.label) + (t.id === 'build' && hasWarnings() ? '<span class="tab-dot"></span>' : '') + '</button>';
+  }).join('');
+  return '<div class="server-rail"><div class="inner-wrap" style="display:flex;gap:8px"><div class="server-icon active">' + icon('bot', 17, '#fff') + '</div>' +
+    '<div class="server-icon">🎮</div><div class="server-icon">🎨</div><div class="server-icon">🎧</div><div class="server-icon">📚</div></div></div>' +
+    '<div class="header"><div class="inner-wrap"><div class="header-row">' + icon('hash', 18, 'var(--text-muted)') +
+    '<input class="bot-name-input" value="' + esc(state.botName) + '" data-field="botName" placeholder="Name your bot" aria-label="Bot name" />' +
+    '<span class="badge badge-green">Bot Builder</span></div><div class="tabs">' + tabs + '</div></div></div>';
+}
+
+function render() {
+  const app = document.getElementById('app');
+  let bodyHTML = '';
+  if (state.activeTab === 'build') bodyHTML = buildTabHTML();
+  else if (state.activeTab === 'code') bodyHTML = codeTabHTML();
+  else if (state.activeTab === 'files') bodyHTML = filesTabHTML();
+  else if (state.activeTab === 'setup') bodyHTML = setupTabHTML();
+
+  let modalsHTML = '';
+  if (state.eventPickerOpen) modalsHTML += eventPickerModalHTML();
+  if (state.pickerOpen) modalsHTML += blockPickerModalHTML();
+  if (state.varsOpen) modalsHTML += variablesModalHTML();
+
+  app.innerHTML = headerHTML() + '<div class="content">' + bodyHTML + '</div>' + modalsHTML;
+}
+
+/* ============================================================
+   COPY / DOWNLOAD
+   ============================================================ */
+function copySourceText(which) {
+  if (which === 'code') return generateFullCode(state.scripts, state.variables, state.botName);
+  if (which === 'pkg') return generatePackageJson(state.botName);
+  if (which === 'env') return 'DISCORD_TOKEN=paste_your_bot_token_here\n';
+  if (which === 'readme') return generateReadme(state.botName, state.scripts);
+  if (which === 'invite') {
+    const cid = state.clientId.trim();
+    if (!cid) return '';
+    const permInfo = computePermissions(state.scripts);
+    return 'https://discord.com/api/oauth2/authorize?client_id=' + encodeURIComponent(cid) + '&permissions=' + permInfo.total + '&scope=bot%20applications.commands';
+  }
+  return '';
+}
+
+async function copyToClipboard(text) {
+  try {
+    await navigator.clipboard.writeText(text);
+    return true;
+  } catch (e) {
+    try {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.focus(); ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      return true;
+    } catch (e2) {
+      return false;
+    }
+  }
+}
+
+function downloadText(filename, content) {
+  const blob = new Blob([content], { type: 'text/plain' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click(); a.remove();
+  URL.revokeObjectURL(url);
+}
+
+async function handleCopy(btn) {
+  const text = copySourceText(btn.dataset.copy);
+  if (!text) return;
+  const ok = await copyToClipboard(text);
+  if (ok) {
+    const original = btn.innerHTML;
+    btn.innerHTML = icon('check', 13, '#fff') + ' Copied';
+    btn.classList.add('btn-copied');
+    setTimeout(function () { btn.innerHTML = original; btn.classList.remove('btn-copied'); }, 1400);
+  }
+}
+function handleDownload(btn) {
+  const text = copySourceText(btn.dataset.copy);
+  downloadText(btn.dataset.file, text);
+}
+
+/* ============================================================
+   FIELD CHANGE HANDLING
+   ============================================================ */
+function applyFieldChange(el) {
+  const value = el.type === 'checkbox' ? el.checked : el.value;
+
+  if (el.dataset.varId) {
+    const v = state.variables.filter(function (x) { return x.id === el.dataset.varId; })[0];
+    if (v) v[el.dataset.fieldKey] = value;
+    return;
+  }
+  if (el.dataset.field === 'botName') { state.botName = value; return; }
+  if (el.dataset.field === 'clientId') {
+    state.clientId = value;
+    const area = document.getElementById('invite-area');
+    if (area) area.innerHTML = inviteAreaHTML(computePermissions(state.scripts));
+    return;
+  }
+  if (el.dataset.fieldScript && el.dataset.fieldBlock) {
+    const script = state.scripts.filter(function (s) { return s.id === el.dataset.fieldScript; })[0];
+    const block = script && script.blocks.filter(function (b) { return b.id === el.dataset.fieldBlock; })[0];
+    if (!block) return;
+    block.config[el.dataset.fieldKey] = value;
+    const def = ACTION_DEFS[block.type];
+    if (def && def.preview) {
+      const previewEl = document.getElementById('preview-' + block.id);
+      if (previewEl) {
+        const ctx = ctxFor(script, state.variables);
+        previewEl.innerHTML = def.preview === 'message' ? messagePreviewHTML(block.config.text, ctx)
+          : def.preview === 'embed' ? embedPreviewHTML(block.config, ctx)
+          : buttonsPreviewHTML(block.config, ctx);
+      }
+    }
+    if (el.type === 'color') {
+      const span = el.parentElement.querySelector('span');
+      if (span) span.textContent = value;
+    }
+    return;
+  }
+  if (el.dataset.fieldScript) {
+    const script = state.scripts.filter(function (s) { return s.id === el.dataset.fieldScript; })[0];
+    if (script) script.event.config[el.dataset.fieldKey] = value;
+    return;
+  }
+}
+function matchesField(el) {
+  return el.hasAttribute('data-field') || el.hasAttribute('data-field-key');
+}
+
+/* ============================================================
+   EVENT WIRING
+   ============================================================ */
+function initEvents() {
+  const app = document.getElementById('app');
+
+  app.addEventListener('click', function (e) {
+    if (e.target.classList && e.target.classList.contains('modal-overlay')) {
+      closeAllModals(); render(); return;
+    }
+    const btn = e.target.closest('[data-act]');
+    if (!btn) return;
+    const act = btn.dataset.act;
+
+    if (act === 'tab') { state.activeTab = btn.dataset.tab; render(); }
+    else if (act === 'open-event-picker') { state.eventPickerOpen = true; render(); }
+    else if (act === 'open-picker') { state.pickerOpen = true; render(); }
+    else if (act === 'open-vars') { state.varsOpen = true; render(); }
+    else if (act === 'close-modal') { closeAllModals(); render(); }
+    else if (act === 'add-script') { addScript(btn.dataset.event); render(); }
+    else if (act === 'load-template') { loadTemplate(btn.dataset.id); render(); }
+    else if (act === 'select-script') { state.selectedScriptId = btn.dataset.id; render(); }
+    else if (act === 'delete-script') { deleteScript(btn.dataset.id); render(); }
+    else if (act === 'add-block') { addBlock(btn.dataset.type); render(); }
+    else if (act === 'delete-block') { deleteBlock(btn.dataset.script, btn.dataset.block); render(); }
+    else if (act === 'move-block') { moveBlock(btn.dataset.script, btn.dataset.block, parseInt(btn.dataset.dir, 10)); render(); }
+    else if (act === 'add-var') { addVariable(); render(); }
+    else if (act === 'delete-var') { deleteVariable(btn.dataset.id); render(); }
+    else if (act === 'copy') { handleCopy(btn); }
+    else if (act === 'download') { handleDownload(btn); }
+  });
+
+  app.addEventListener('input', function (e) {
+    if (matchesField(e.target)) applyFieldChange(e.target);
+  });
+
+  app.addEventListener('change', function (e) {
+    if (matchesField(e.target)) { applyFieldChange(e.target); render(); }
+  });
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && (state.eventPickerOpen || state.pickerOpen || state.varsOpen)) {
+      closeAllModals(); render();
+    }
+  });
+}
+
+render();
+initEvents();
+</script>
+</body>
+</html>
