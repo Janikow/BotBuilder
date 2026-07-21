@@ -256,38 +256,6 @@
 
   .empty-state { text-align: center; padding: 32px 12px; font-size: 14px; color: var(--text-muted); }
 
-  /* live preview */
-  .sim-chat { border-radius: 12px; border: 1px solid var(--border); background: var(--bg-deep); padding: 12px; min-height: 200px; max-height: 50vh; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; margin-bottom: 10px; }
-  .sim-msg { display: flex; gap: 10px; }
-  .sim-avatar { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 13px; font-weight: 700; color: #fff; }
-  .sim-avatar-user { background: var(--green); }
-  .sim-msg-body { min-width: 0; flex: 1; }
-  .sim-msg-head { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
-  .sim-msg-name { font-size: 13px; font-weight: 600; color: var(--text); }
-  .sim-msg-text { font-size: 13.5px; color: var(--text-normal); margin-top: 1px; white-space: pre-wrap; word-break: break-word; }
-  .sim-channel-note { font-size: 11px; color: var(--text-dim); }
-  .sim-system { font-size: 12px; color: var(--text-muted); font-style: italic; text-align: center; }
-  .sim-console { font-size: 11.5px; color: var(--text-dim); font-family: var(--mono); display: flex; align-items: center; gap: 6px; }
-  .sim-deleted { font-size: 12px; color: var(--text-dim); font-style: italic; display: flex; align-items: center; gap: 6px; }
-  .sim-reactions { display: flex; gap: 4px; margin-top: 4px; }
-  .sim-reaction-badge { background: var(--bg-side); border: 1px solid var(--border); border-radius: 8px; padding: 1px 6px; font-size: 12px; }
-  .sim-btn-row { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
-  .sim-button-chip { border: none; border-radius: 6px; padding: 6px 14px; font-size: 12.5px; font-weight: 600; color: #fff; transition: transform .1s ease, filter .15s ease; }
-  .sim-button-chip:hover { filter: brightness(1.1); }
-  .sim-button-chip:active { transform: scale(.95); }
-  .sim-pending-banner { display: flex; align-items: center; gap: 8px; background: rgba(88,101,242,.12); border: 1px solid rgba(88,101,242,.4); border-radius: 10px; padding: 8px 10px; margin-bottom: 8px; font-size: 12.5px; color: var(--text-normal); }
-  .sim-pending-banner span { flex: 1; }
-  .sim-input-row { display: flex; gap: 8px; margin-bottom: 12px; }
-  .sim-input-row .field-input { flex: 1; }
-  .sim-section { border-radius: 12px; border: 1px solid var(--border); background: var(--bg-side); padding: 12px; margin-bottom: 10px; }
-  .sim-btn-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
-  .sim-row-inline { display: flex; gap: 8px; margin-bottom: 8px; align-items: center; }
-  .sim-row-inline .field-input { flex: 1; }
-  .sim-row-inline:last-child { margin-bottom: 0; }
-  .sim-debug-row { font-size: 12.5px; color: var(--text-normal); margin-bottom: 4px; line-height: 1.5; }
-  .sim-debug-row:last-child { margin-bottom: 0; }
-  .sim-debug-row b { color: var(--text); }
-
   /* real, static page content, not app UI. Kept outside #app so it's present
      in the raw HTML regardless of JS execution (crawlers, ad review, etc). */
   .site-content { max-width: 780px; margin: 0 auto; padding: 22px 16px; color: var(--text-normal); }
@@ -463,8 +431,6 @@ const ICONS = {
   pin: svg('<path d="M9 4h6l-1 5 4 3v2H6v-2l4-3-1-5z"/><path d="M12 14v6"/>'),
   tag: svg('<path d="M3 11V4h7l10 10-7 7L3 11z"/><circle cx="7.5" cy="7.5" r="1.2" fill="currentColor" stroke="none"/>'),
   dice: svg('<rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8" cy="8" r="1.3" fill="currentColor" stroke="none"/><circle cx="16" cy="8" r="1.3" fill="currentColor" stroke="none"/><circle cx="8" cy="16" r="1.3" fill="currentColor" stroke="none"/><circle cx="16" cy="16" r="1.3" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.3" fill="currentColor" stroke="none"/>'),
-  play: svg('<path d="M7 4l13 8-13 8z"/>'),
-  reply: svg('<path d="M9 17l-6-6 6-6"/><path d="M3 11h11a6 6 0 0 1 6 6v2"/>'),
 };
 function icon(name, size, color) {
   size = size || 16; color = color || 'currentColor';
@@ -491,7 +457,7 @@ function genId(p) {
 const EVENT_META = {
   ready: { hasMessage: false, hasMember: false, hasUser: false, hasReaction: false, canReply: false, canSame: false },
   messageCreate: { hasMessage: true, hasMember: true, hasUser: true, hasReaction: false, canReply: true, canSame: true },
-  slashCommand: { hasMessage: false, hasMember: true, hasUser: true, hasReaction: false, canReply: true, canSame: true },
+  slashCommand: { hasMessage: false, hasMember: true, hasUser: true, hasReaction: false, canReply: true, canSame: false },
   guildMemberAdd: { hasMessage: false, hasMember: true, hasUser: true, hasReaction: false, canReply: false, canSame: false },
   guildMemberRemove: { hasMessage: false, hasMember: true, hasUser: true, hasReaction: false, canReply: false, canSame: false },
   messageReactionAdd: { hasMessage: false, hasMember: true, hasUser: true, hasReaction: true, canReply: false, canSame: true },
@@ -499,7 +465,7 @@ const EVENT_META = {
   messageReactionRemove: { hasMessage: false, hasMember: true, hasUser: true, hasReaction: true, canReply: false, canSame: true },
   voiceChannelJoin: { hasMessage: false, hasMember: true, hasUser: true, hasReaction: false, canReply: false, canSame: false },
   voiceChannelLeave: { hasMessage: false, hasMember: true, hasUser: true, hasReaction: false, canReply: false, canSame: false },
-  buttonClick: { hasMessage: false, hasMember: true, hasUser: true, hasReaction: false, canReply: true, canSame: true },
+  buttonClick: { hasMessage: false, hasMember: true, hasUser: true, hasReaction: false, canReply: true, canSame: false },
 };
 
 const EVENT_DEFS = {
@@ -620,7 +586,7 @@ function getRefs(eventType) {
     case 'messageCreate':
       return { userRef: 'message.author', memberRef: 'message.member', replyTarget: 'message', sameChannel: 'message.channel' };
     case 'slashCommand':
-      return { userRef: 'interaction.user', memberRef: 'interaction.member', replyTarget: 'interaction', sameChannel: 'interaction.channel' };
+      return { userRef: 'interaction.user', memberRef: 'interaction.member', replyTarget: 'interaction', sameChannel: null };
     case 'guildMemberAdd':
       return { userRef: 'member.user', memberRef: 'member', replyTarget: null, sameChannel: null };
     case 'guildMemberRemove':
@@ -636,7 +602,7 @@ function getRefs(eventType) {
     case 'voiceChannelLeave':
       return { userRef: 'oldState.member.user', memberRef: 'oldState.member', replyTarget: null, sameChannel: null };
     case 'buttonClick':
-      return { userRef: 'interaction.user', memberRef: 'interaction.member', replyTarget: 'interaction', sameChannel: 'interaction.channel' };
+      return { userRef: 'interaction.user', memberRef: 'interaction.member', replyTarget: 'interaction', sameChannel: null };
     default:
       return {};
   }
@@ -748,13 +714,12 @@ const ACTION_DEFS = {
       const text = interpolate(block.config.text, varMap);
       const target = block.config.target;
       const namedSend = '{ const ch = client.channels.cache.find((c) => c.name === ' + JSON.stringify(block.config.channelName) + ' && c.isTextBased()); if (ch) await ch.send(' + text + '); }';
+      if (eventType === 'slashCommand') {
+        return target === 'reply' ? ['await interaction.reply(' + text + ');'] : [namedSend];
+      }
       if (target === 'reply' && refs.replyTarget) return ['await ' + refs.replyTarget + '.reply(' + text + ');'];
       if (target === 'same' && refs.sameChannel) return ['await ' + refs.sameChannel + '.send(' + text + ');'];
       return [namedSend];
-    },
-    sim: function (block, ctx) {
-      const c = block.config;
-      ctx.push({ type: 'bot-message', text: simInterpolate(c.text, ctx), channelNote: c.target === 'named' ? c.channelName : '' });
     },
   },
 
@@ -788,18 +753,14 @@ const ACTION_DEFS = {
       const lines = ['const ' + varName + ' = ' + parts.join('') + ';'];
       const payload = '{ embeds: [' + varName + '] }';
       const namedSend = '{ const ch = client.channels.cache.find((c) => c.name === ' + JSON.stringify(c.channelName) + ' && c.isTextBased()); if (ch) await ch.send(' + payload + '); }';
+      if (eventType === 'slashCommand') {
+        lines.push(c.target === 'reply' ? 'await interaction.reply(' + payload + ');' : namedSend);
+        return lines;
+      }
       if (c.target === 'reply' && refs.replyTarget) lines.push('await ' + refs.replyTarget + '.reply(' + payload + ');');
       else if (c.target === 'same' && refs.sameChannel) lines.push('await ' + refs.sameChannel + '.send(' + payload + ');');
       else lines.push(namedSend);
       return lines;
-    },
-    sim: function (block, ctx) {
-      const c = block.config;
-      ctx.push({
-        type: 'bot-embed', title: simInterpolate(c.title, ctx), description: simInterpolate(c.description, ctx),
-        color: c.color, footer: simInterpolate(c.footer, ctx), imageUrl: c.imageUrl,
-        channelNote: c.target === 'named' ? c.channelName : '',
-      });
     },
   },
 
@@ -809,9 +770,6 @@ const ACTION_DEFS = {
     getFields: function () { return [{ key: 'text', label: 'DM text', type: 'textarea', default: 'Hey {{user}}, thanks for being here!', interp: true }]; },
     preview: 'message',
     gen: function (block, eventType, refs, varMap) { return ['await ' + refs.userRef + '.send(' + interpolate(block.config.text, varMap) + ').catch(() => {});']; },
-    sim: function (block, ctx) {
-      ctx.push({ type: 'system', text: '📩 DM sent to ' + ctx.user.name + ': "' + simInterpolate(block.config.text, ctx) + '"' });
-    },
   },
 
   deleteMessage: {
@@ -819,10 +777,6 @@ const ACTION_DEFS = {
     allowed: function (ctx) { return ctx.hasMessage; },
     getFields: function () { return []; },
     gen: function () { return ['await message.delete().catch(() => {});']; },
-    sim: function (block, ctx) {
-      if (ctx.triggerId) ctx.markDeleted(ctx.triggerId);
-      ctx.push({ type: 'system', text: '🗑️ Message deleted' });
-    },
   },
 
   addReaction: {
@@ -830,10 +784,6 @@ const ACTION_DEFS = {
     allowed: function (ctx) { return ctx.hasMessage; },
     getFields: function () { return [{ key: 'emoji', label: 'Emoji', type: 'text', default: '👍' }]; },
     gen: function (block) { return ['await message.react(' + JSON.stringify(block.config.emoji) + ').catch(() => {});']; },
-    sim: function (block, ctx) {
-      if (ctx.triggerId) ctx.addReactionTo(ctx.triggerId, block.config.emoji);
-      ctx.push({ type: 'system', text: '🤖 Bot reacted with ' + block.config.emoji });
-    },
   },
 
   sendButtons: {
@@ -877,19 +827,14 @@ const ACTION_DEFS = {
       const text = interpolate(c.text, varMap);
       const payload = '{ content: ' + text + ', components: [' + rowVar + '] }';
       const namedSend = '{ const ch = client.channels.cache.find((c) => c.name === ' + JSON.stringify(c.channelName) + ' && c.isTextBased()); if (ch) await ch.send(' + payload + '); }';
+      if (eventType === 'slashCommand' || eventType === 'buttonClick') {
+        lines.push(c.target === 'reply' ? 'await interaction.reply(' + payload + ');' : namedSend);
+        return lines;
+      }
       if (c.target === 'reply' && refs.replyTarget) lines.push('await ' + refs.replyTarget + '.reply(' + payload + ');');
       else if (c.target === 'same' && refs.sameChannel) lines.push('await ' + refs.sameChannel + '.send(' + payload + ');');
       else lines.push(namedSend);
       return lines;
-    },
-    sim: function (block, ctx) {
-      const c = block.config;
-      const btns = [];
-      if (c.btn1Label) btns.push({ label: c.btn1Label, style: c.btn1Style, id: c.btn1Id || 'btn_1' });
-      if (c.btn2Label) btns.push({ label: c.btn2Label, style: c.btn2Style, id: c.btn2Id || 'btn_2' });
-      if (c.btn3Label) btns.push({ label: c.btn3Label, style: c.btn3Style, id: c.btn3Id || 'btn_3' });
-      if (btns.length === 0) btns.push({ label: 'Click', style: 'primary', id: 'btn_1' });
-      ctx.push({ type: 'bot-buttons', text: simInterpolate(c.text, ctx), buttons: btns, channelNote: c.target === 'named' ? c.channelName : '' });
     },
   },
 
@@ -898,10 +843,6 @@ const ACTION_DEFS = {
     allowed: function (ctx) { return ctx.hasMessage; },
     getFields: function () { return []; },
     gen: function () { return ['await message.pin().catch(() => {});']; },
-    sim: function (block, ctx) {
-      if (ctx.triggerId) ctx.markPinned(ctx.triggerId);
-      ctx.push({ type: 'system', text: '📌 Message pinned' });
-    },
   },
 
   sendTyping: {
@@ -909,81 +850,6 @@ const ACTION_DEFS = {
     allowed: function (ctx) { return ctx.canSame; },
     getFields: function () { return []; },
     gen: function (block, eventType, refs) { return [refs.sameChannel + '.sendTyping().catch(() => {});']; },
-    sim: function (block, ctx) { ctx.push({ type: 'system', text: '⌨️ Bot is typing…' }); },
-  },
-
-  askReply: {
-    label: 'Ask & Wait for Reply', icon: 'reply', color: COLORS.blurple, category: 'Messages',
-    allowed: function (ctx) { return ctx.hasUser; },
-    getFields: function (ctx) {
-      const opts = [];
-      if (ctx.canReply) opts.push(['reply', 'Reply directly to this']);
-      if (ctx.canSame) opts.push(['same', 'This channel']);
-      opts.push(['named', 'A specific channel by name']);
-      return [
-        { key: 'target', label: 'Ask in', type: 'select', default: ctx.canReply ? 'reply' : ctx.canSame ? 'same' : 'named', options: opts },
-        { key: 'channelName', label: 'Channel name', type: 'text', default: 'general', showIf: function (c) { return c.target === 'named'; } },
-        { key: 'text', label: 'Question to ask', type: 'textarea', default: 'Reply to this message with your new nickname!', interp: true },
-        { key: 'varName', label: 'Save their reply in', type: 'select', default: ctx.variables[0] || '', options: ctx.variables.length ? ctx.variables.map(function (v) { return [v, v]; }) : [['', 'Add a variable first ↓']] },
-        { key: 'timeoutSeconds', label: 'Give up after (seconds)', type: 'number', default: 60 },
-      ];
-    },
-    preview: 'message',
-    gen: function (block, eventType, refs, varMap) {
-      const c = block.config;
-      if (!c.varName) return ['// (Ask & Wait for Reply: pick a variable to save the reply in)'];
-      const text = interpolate(c.text, varMap);
-      const timeout = Math.max(5, Math.min(600, Number(c.timeoutSeconds) || 60));
-      const userIdExpr = refs.userRef + '.id';
-      function tail(msgVar) {
-        return [
-          'try {',
-          '  const _collected = await ' + msgVar + '.channel.awaitMessages({ filter: (m) => m.reference && m.reference.messageId === ' + msgVar + '.id && m.author.id === ' + userIdExpr + ', max: 1, time: ' + timeout + ' * 1000, errors: [\'time\'] });',
-          '  botVars[' + JSON.stringify(c.varName) + '] = _collected.first().content;',
-          '} catch (e) { /* no reply received in time */ }',
-        ];
-      }
-      const namedBlock = function () {
-        const lines = ['{ const ch = client.channels.cache.find((c) => c.name === ' + JSON.stringify(c.channelName) + ' && c.isTextBased()); if (ch) {'];
-        lines.push('  const _promptMsg = await ch.send(' + text + ');');
-        tail('_promptMsg').forEach(function (l) { lines.push('  ' + l); });
-        lines.push('} }');
-        return lines;
-      };
-      const isInteraction = (eventType === 'slashCommand' || eventType === 'buttonClick');
-      // interaction.reply() doesn't return a Message directly like message.reply()/channel.send() do,
-      // so it needs its own fetchReply() step to get something awaitMessages() can be called on.
-      if (isInteraction && c.target === 'reply') {
-        const lines = ['await interaction.reply(' + text + ');', '{', '  const _promptMsg = await interaction.fetchReply();'];
-        tail('_promptMsg').forEach(function (l) { lines.push('  ' + l); });
-        lines.push('}');
-        return lines;
-      }
-      if (!isInteraction && c.target === 'reply' && refs.replyTarget) {
-        const lines = ['{', '  const _promptMsg = await ' + refs.replyTarget + '.reply(' + text + ');'];
-        tail('_promptMsg').forEach(function (l) { lines.push('  ' + l); });
-        lines.push('}');
-        return lines;
-      }
-      if (c.target === 'same' && refs.sameChannel) {
-        const lines = ['{', '  const _promptMsg = await ' + refs.sameChannel + '.send(' + text + ');'];
-        tail('_promptMsg').forEach(function (l) { lines.push('  ' + l); });
-        lines.push('}');
-        return lines;
-      }
-      return namedBlock();
-    },
-    sim: function (block, ctx) {
-      const c = block.config;
-      ctx.push({ type: 'bot-message', text: simInterpolate(c.text, ctx), channelNote: c.target === 'named' ? c.channelName : '' });
-      if (!ctx.isTopLevel || !c.varName) {
-        if (c.varName) ctx.vars[c.varName] = '';
-        ctx.push({ type: 'console', text: !c.varName ? '(no variable selected to store the reply)' : "(preview can't pause for a reply inside If/Repeat \u2014 this works fine in the real bot)" });
-        return;
-      }
-      state.simPending = { blocks: ctx.resumeBlocks, index: ctx.resumeIndex, varName: c.varName };
-      throw SIM_PAUSE;
-    },
   },
 
   addRole: {
@@ -999,11 +865,6 @@ const ACTION_DEFS = {
       return [memberActionLine(block, refs, eventType, function (ref) {
         return '{ const role = ' + ref + '.guild.roles.cache.find((r) => r.name === ' + JSON.stringify(block.config.roleName) + '); if (role) await ' + ref + '.roles.add(role).catch(() => {}); }';
       })];
-    },
-    sim: function (block, ctx) {
-      const name = block.config.roleName;
-      if (ctx.user.roles.indexOf(name) === -1) ctx.user.roles.push(name);
-      ctx.push({ type: 'system', text: '✅ Role "' + name + '" added' });
     },
   },
 
@@ -1021,11 +882,6 @@ const ACTION_DEFS = {
         return '{ const role = ' + ref + '.guild.roles.cache.find((r) => r.name === ' + JSON.stringify(block.config.roleName) + '); if (role) await ' + ref + '.roles.remove(role).catch(() => {}); }';
       })];
     },
-    sim: function (block, ctx) {
-      const name = block.config.roleName;
-      ctx.user.roles = ctx.user.roles.filter(function (r) { return r !== name; });
-      ctx.push({ type: 'system', text: '❌ Role "' + name + '" removed' });
-    },
   },
 
   setNickname: {
@@ -1042,11 +898,6 @@ const ACTION_DEFS = {
         return 'await ' + ref + '.setNickname(' + interpolate(block.config.nickname, varMap) + ').catch(() => {});';
       })];
     },
-    sim: function (block, ctx) {
-      const nick = simInterpolate(block.config.nickname, ctx);
-      ctx.user.nickname = nick;
-      ctx.push({ type: 'system', text: '🏷️ Nickname changed to "' + nick + '"' });
-    },
   },
 
   kickMember: {
@@ -1061,7 +912,6 @@ const ACTION_DEFS = {
     gen: function (block, eventType, refs) {
       return [memberActionLine(block, refs, eventType, function (ref) { return 'await ' + ref + '.kick(' + JSON.stringify(block.config.reason) + ').catch(() => {});'; })];
     },
-    sim: function (block, ctx) { ctx.push({ type: 'system', text: '👢 Kicked (reason: ' + (block.config.reason || 'none') + ')' }); },
   },
 
   banMember: {
@@ -1076,7 +926,6 @@ const ACTION_DEFS = {
     gen: function (block, eventType, refs) {
       return [memberActionLine(block, refs, eventType, function (ref) { return 'await ' + ref + '.ban({ reason: ' + JSON.stringify(block.config.reason) + ' }).catch(() => {});'; })];
     },
-    sim: function (block, ctx) { ctx.push({ type: 'system', text: '🔨 Banned (reason: ' + (block.config.reason || 'none') + ')' }); },
   },
 
   timeoutMember: {
@@ -1094,9 +943,6 @@ const ACTION_DEFS = {
         return 'await ' + ref + '.timeout(' + (Number(block.config.minutes) || 10) + ' * 60 * 1000, ' + JSON.stringify(block.config.reason) + ').catch(() => {});';
       })];
     },
-    sim: function (block, ctx) {
-      ctx.push({ type: 'system', text: '⏱️ Timed out for ' + (Number(block.config.minutes) || 10) + ' minutes (reason: ' + (block.config.reason || 'none') + ')' });
-    },
   },
 
   purgeMessages: {
@@ -1106,11 +952,6 @@ const ACTION_DEFS = {
     gen: function (block, eventType, refs) {
       const n = Math.max(1, Math.min(100, Number(block.config.count) || 10));
       return [refs.sameChannel + '.bulkDelete(' + n + ', true).catch(() => {});'];
-    },
-    sim: function (block, ctx) {
-      const n = Math.max(1, Math.min(100, Number(block.config.count) || 10));
-      ctx.purge(n);
-      ctx.push({ type: 'system', text: '🧹 Deleted up to ' + n + ' recent messages' });
     },
   },
 
@@ -1129,13 +970,6 @@ const ACTION_DEFS = {
       if (!name) return ['// (no variable selected)'];
       if (block.config.mode === 'increment') return ['botVars[' + JSON.stringify(name) + '] = (Number(botVars[' + JSON.stringify(name) + ']) || 0) + 1;'];
       return ['botVars[' + JSON.stringify(name) + '] = ' + interpolate(block.config.value, varMap) + ';'];
-    },
-    sim: function (block, ctx) {
-      const name = block.config.varName;
-      if (!name) return;
-      if (block.config.mode === 'increment') ctx.vars[name] = (Number(ctx.vars[name]) || 0) + 1;
-      else ctx.vars[name] = simInterpolate(block.config.value, ctx);
-      ctx.push({ type: 'console', text: name + ' = ' + JSON.stringify(ctx.vars[name]) });
     },
   },
 
@@ -1159,15 +993,6 @@ const ACTION_DEFS = {
       const arr = '[' + opts.map(function (o) { return interpolate(o, varMap); }).join(', ') + ']';
       return ['{ const _choices = ' + arr + '; botVars[' + JSON.stringify(c.varName) + '] = _choices[Math.floor(Math.random() * _choices.length)]; }'];
     },
-    sim: function (block, ctx) {
-      const c = block.config;
-      if (!c.varName) return;
-      let opts = [c.opt1, c.opt2, c.opt3, c.opt4].filter(function (o) { return o; }).map(function (o) { return simInterpolate(o, ctx); });
-      if (opts.length === 0) opts = ['Yes', 'No'];
-      const pick = opts[Math.floor(Math.random() * opts.length)];
-      ctx.vars[c.varName] = pick;
-      ctx.push({ type: 'console', text: c.varName + ' = ' + JSON.stringify(pick) + ' (random pick)' });
-    },
   },
 
   wait: {
@@ -1175,7 +1000,6 @@ const ACTION_DEFS = {
     allowed: function () { return true; },
     getFields: function () { return [{ key: 'seconds', label: 'Seconds to wait', type: 'number', default: 2 }]; },
     gen: function (block) { return ['await new Promise((resolve) => setTimeout(resolve, ' + (Number(block.config.seconds) || 1) + ' * 1000));']; },
-    sim: function (block, ctx) { ctx.push({ type: 'console', text: '(waited ' + (Number(block.config.seconds) || 1) + 's)' }); },
   },
 
   log: {
@@ -1183,7 +1007,6 @@ const ACTION_DEFS = {
     allowed: function () { return true; },
     getFields: function () { return [{ key: 'text', label: 'Message to log', type: 'text', default: 'checkpoint reached', interp: true }]; },
     gen: function (block, eventType, refs, varMap) { return ['console.log(' + interpolate(block.config.text, varMap) + ');']; },
-    sim: function (block, ctx) { ctx.push({ type: 'console', text: simInterpolate(block.config.text, ctx) }); },
   },
 
   ifStart: {
@@ -1253,252 +1076,6 @@ function ctxFor(script, variables) {
     userOptions: userOptions, otherOptions: otherOptions,
     variables: variables.map(function (v) { return v.name; }).filter(Boolean),
   };
-}
-
-/* ============================================================
-   LIVE PREVIEW — an in-browser interpreter for the same block
-   model that CODE GENERATION (below) compiles to discord.js.
-   It runs your triggers/actions against a simulated chat instead
-   of generating text, so you can test a bot without deploying it.
-   ============================================================ */
-function simInterpolate(str, ctx) {
-  if (!str) return '';
-  return String(str).replace(/\{\{\s*([\w:]+)\s*\}\}/g, function (m, key) {
-    if (key === 'user') return ctx.user.name;
-    if (key === 'mention') return '@' + ctx.user.name;
-    if (key === 'server') return 'My Server';
-    if (key === 'channel') return ctx.channel || 'general';
-    if (key === 'message') return ctx.eventData.content || '';
-    if (key === 'emoji') return ctx.eventData.emoji || '';
-    if (key === 'buttonId') return ctx.eventData.customId || '';
-    if (key.indexOf('option:') === 0) {
-      const optName = key.slice(7);
-      const v = ctx.eventData.options ? ctx.eventData.options[optName] : undefined;
-      return v !== undefined ? String(v) : '';
-    }
-    if (key.indexOf('var:') === 0) {
-      const varName = key.slice(4);
-      return ctx.vars[varName] !== undefined ? String(ctx.vars[varName]) : '';
-    }
-    return m;
-  });
-}
-
-function evalSimCondition(block, ctx) {
-  const c = block.config;
-  if (c.cond === 'random') {
-    const roll = Math.random() * 100;
-    const pass = roll < (Number(c.percent) || 50);
-    ctx.push({ type: 'console', text: 'random roll: ' + roll.toFixed(1) + ' (needed under ' + (Number(c.percent) || 50) + ')' });
-    return pass;
-  }
-  if (c.cond === 'varEquals') return String(ctx.vars[c.varName]) === (c.varValue || '');
-  if (c.cond === 'msgContains') return (ctx.eventData.content || '').toLowerCase().indexOf((c.text || '').toLowerCase()) !== -1;
-  if (c.cond === 'msgEquals') return (ctx.eventData.content || '').toLowerCase() === (c.text || '').toLowerCase();
-  if (c.cond === 'msgStarts') return (ctx.eventData.content || '').toLowerCase().indexOf((c.text || '').toLowerCase()) === 0;
-  if (c.cond === 'hasRole') return ctx.user.roles.indexOf(c.roleName) !== -1;
-  return true;
-}
-
-// Scans forward from an ifStart/repeatStart at startIdx, tracking nesting, to
-// find the matching elseBlock (if any, ifStart only) and closing block.
-function findSimBounds(blocks, startIdx, openType, elseType, closeType) {
-  let depth = 1;
-  let elseIdx = -1;
-  for (let i = startIdx + 1; i < blocks.length; i++) {
-    const t = blocks[i].type;
-    if (t === openType) depth++;
-    else if (t === closeType) { depth--; if (depth === 0) return { elseIdx: elseIdx, endIdx: i }; }
-    else if (elseType && t === elseType && depth === 1) elseIdx = i;
-  }
-  return { elseIdx: elseIdx, endIdx: blocks.length - 1 }; // unmatched — run to end defensively
-}
-
-const SIM_PAUSE = { __simPause: true };
-
-function simRunBlocks(blocks, ctx, isTopLevel) {
-  let i = 0;
-  while (i < blocks.length) {
-    ctx.stepCount++;
-    if (ctx.stepCount > 300) {
-      if (!ctx.stepLimitHit) { ctx.stepLimitHit = true; ctx.push({ type: 'system', text: '⚠️ Stopped early — this looks like it might loop forever. Check your Repeat/If blocks.' }); }
-      return;
-    }
-    const block = blocks[i];
-    const type = block.type;
-    if (type === 'ifStart') {
-      const bounds = findSimBounds(blocks, i, 'ifStart', 'elseBlock', 'ifEnd');
-      const matched = evalSimCondition(block, ctx);
-      const bodyEnd = bounds.elseIdx !== -1 ? bounds.elseIdx : bounds.endIdx;
-      if (matched) simRunBlocks(blocks.slice(i + 1, bodyEnd), ctx, false);
-      else if (bounds.elseIdx !== -1) simRunBlocks(blocks.slice(bounds.elseIdx + 1, bounds.endIdx), ctx, false);
-      i = bounds.endIdx + 1;
-      continue;
-    }
-    if (type === 'repeatStart') {
-      const bounds = findSimBounds(blocks, i, 'repeatStart', null, 'repeatEnd');
-      const times = Math.max(0, Math.min(20, Number(block.config.times) || 3));
-      if (Number(block.config.times) > 20) ctx.push({ type: 'console', text: 'repeat capped at 20 loops in preview (configured: ' + block.config.times + ')' });
-      for (let r = 0; r < times; r++) simRunBlocks(blocks.slice(i + 1, bounds.endIdx), ctx, false);
-      i = bounds.endIdx + 1;
-      continue;
-    }
-    if (type === 'elseBlock' || type === 'ifEnd' || type === 'repeatEnd') { i++; continue; }
-    const def = ACTION_DEFS[type];
-    if (def && def.sim) {
-      ctx.isTopLevel = !!isTopLevel;
-      ctx.resumeBlocks = blocks;
-      ctx.resumeIndex = i + 1;
-      def.sim(block, ctx);
-    }
-    i++;
-  }
-}
-
-function simMatchesFilters(script, eventType, eventData) {
-  const c = script.event.config;
-  if (eventType === 'messageCreate') {
-    const content = (eventData.content || '').toLowerCase();
-    const t = (c.filterText || '').toLowerCase();
-    if (c.filterType === 'contains' && content.indexOf(t) === -1) return false;
-    if (c.filterType === 'equals' && content !== t) return false;
-    if (c.filterType === 'startsWith' && content.indexOf(t) !== 0) return false;
-  }
-  if (eventType === 'slashCommand' && (c.commandName || '') !== eventData.commandName) return false;
-  if (eventType === 'buttonClick' && c.idFilter === 'specific' && (c.customId || '') !== eventData.customId) return false;
-  if ((eventType === 'messageReactionAdd' || eventType === 'messageReactionRemove') && c.emojiFilter === 'specific' && (c.emoji || '') !== eventData.emoji) return false;
-  if ((eventType === 'voiceChannelJoin' || eventType === 'voiceChannelLeave') && c.channelFilter === 'specific' && (c.channelName || '') !== eventData.channelName) return false;
-  return true;
-}
-
-function makeSimCtx(eventType, eventData, triggerId) {
-  return {
-    eventType: eventType, eventData: eventData, vars: state.simVars, user: state.simUser,
-    channel: state.simChannel, triggerId: triggerId, stepCount: 0, stepLimitHit: false,
-    push: function (entry) { simPushLog(entry); },
-    markDeleted: function (id) { simMarkDeleted(id); },
-    markPinned: function (id) { simMarkPinned(id); },
-    addReactionTo: function (id, emoji) { simAddReaction(id, emoji); },
-    purge: function (n) { simPurge(n); },
-  };
-}
-
-function runSimScript(blocks, ctx) {
-  try { simRunBlocks(blocks, ctx, true); } catch (e) { if (e !== SIM_PAUSE) throw e; }
-}
-
-function simDispatch(eventType, eventData, triggerId) {
-  const relevant = state.scripts.filter(function (s) { return s.event.type === eventType; });
-  relevant.forEach(function (s) {
-    if (!simMatchesFilters(s, eventType, eventData)) return;
-    runSimScript(s.blocks, makeSimCtx(eventType, eventData, triggerId));
-  });
-}
-
-const SIM_MESSAGE_TYPES = ['user-message', 'bot-message', 'bot-embed', 'bot-buttons'];
-function simPushLog(entry) {
-  entry.id = genId('log');
-  entry.reactions = entry.reactions || [];
-  entry.deleted = false;
-  entry.pinned = false;
-  state.simLog.push(entry);
-}
-function simMarkDeleted(id) { const e = state.simLog.find(function (x) { return x.id === id; }); if (e) e.deleted = true; }
-function simMarkPinned(id) { const e = state.simLog.find(function (x) { return x.id === id; }); if (e) e.pinned = true; }
-function simAddReaction(id, emoji) { const e = state.simLog.find(function (x) { return x.id === id; }); if (e) e.reactions.push(emoji); }
-function simPurge(n) {
-  let removed = 0;
-  for (let i = state.simLog.length - 1; i >= 0 && removed < n; i--) {
-    const e = state.simLog[i];
-    if (!e.deleted && SIM_MESSAGE_TYPES.indexOf(e.type) !== -1) { e.deleted = true; removed++; }
-  }
-}
-
-function simSendMessage(text) {
-  if (!text || !text.trim()) return;
-  if (state.simPending) {
-    const pending = state.simPending;
-    state.simPending = null;
-    simPushLog({ type: 'user-message', text: text });
-    const triggerId = state.simLog[state.simLog.length - 1].id;
-    state.simVars[pending.varName] = text;
-    const ctx = makeSimCtx('messageCreate', { content: text }, triggerId);
-    runSimScript(pending.blocks.slice(pending.index), ctx);
-    return;
-  }
-  simPushLog({ type: 'user-message', text: text });
-  const triggerId = state.simLog[state.simLog.length - 1].id;
-  simDispatch('messageCreate', { content: text }, triggerId);
-}
-function simCancelPending() {
-  if (!state.simPending) return;
-  state.simPending = null;
-  simPushLog({ type: 'system', text: '❌ Cancelled — no longer waiting for a reply' });
-}
-function simRunSlashCommand(commandName, options) {
-  if (!commandName) return;
-  const parts = Object.keys(options).map(function (k) { return k + ':' + options[k]; }).join(' ');
-  simPushLog({ type: 'user-slash', text: '/' + commandName + (parts ? ' ' + parts : '') });
-  simDispatch('slashCommand', { commandName: commandName, options: options }, null);
-}
-function simMemberJoin() {
-  simPushLog({ type: 'system', text: '🚪 ' + state.simUser.name + ' joined the server' });
-  simDispatch('guildMemberAdd', { memberName: state.simUser.name }, null);
-}
-function simMemberLeave() {
-  simPushLog({ type: 'system', text: '🚶 ' + state.simUser.name + ' left the server' });
-  simDispatch('guildMemberRemove', { memberName: state.simUser.name }, null);
-}
-function simVoiceJoin(channelName) {
-  const ch = channelName || 'General';
-  simPushLog({ type: 'system', text: '🎧 ' + state.simUser.name + ' joined voice channel "' + ch + '"' });
-  simDispatch('voiceChannelJoin', { channelName: ch, memberName: state.simUser.name }, null);
-}
-function simVoiceLeave(channelName) {
-  const ch = channelName || 'General';
-  simPushLog({ type: 'system', text: '🔇 ' + state.simUser.name + ' left voice channel "' + ch + '"' });
-  simDispatch('voiceChannelLeave', { channelName: ch, memberName: state.simUser.name }, null);
-}
-function simBotReady() {
-  simPushLog({ type: 'system', text: '🔄 Bot restarted and came online' });
-  simDispatch('ready', {}, null);
-}
-function simDeleteLast() {
-  const messages = state.simLog.filter(function (e) { return !e.deleted && e.type === 'user-message'; });
-  if (!messages.length) return;
-  const last = messages[messages.length - 1];
-  last.deleted = true;
-  simDispatch('messageDelete', { content: last.text }, last.id);
-}
-function simReactLast(emoji, isRemove) {
-  if (!emoji) return;
-  const messages = state.simLog.filter(function (e) { return !e.deleted && SIM_MESSAGE_TYPES.indexOf(e.type) !== -1; });
-  if (!messages.length) return;
-  const last = messages[messages.length - 1];
-  if (isRemove) {
-    last.reactions = (last.reactions || []).filter(function (r) { return r !== emoji; });
-    simPushLog({ type: 'system', text: state.simUser.name + ' removed their ' + emoji + ' reaction' });
-    simDispatch('messageReactionRemove', { emoji: emoji }, last.id);
-  } else {
-    last.reactions = (last.reactions || []).concat([emoji]);
-    simPushLog({ type: 'system', text: state.simUser.name + ' reacted with ' + emoji });
-    simDispatch('messageReactionAdd', { emoji: emoji }, last.id);
-  }
-}
-function simClickButton(customId) {
-  simPushLog({ type: 'system', text: state.simUser.name + ' clicked "' + customId + '"' });
-  simDispatch('buttonClick', { customId: customId }, null);
-}
-function simResetVarsFromConfig() {
-  const vars = {};
-  state.variables.forEach(function (v) { if (v.name) vars[v.name] = v.value || ''; });
-  return vars;
-}
-function simReset() {
-  state.simLog = [];
-  state.simVars = simResetVarsFromConfig();
-  state.simUser = { name: 'Alex', roles: ['Member'], nickname: null };
-  state.simPending = null;
 }
 
 /* ============================================================
@@ -1583,10 +1160,7 @@ function generateFullCode(scripts, variables, botName) {
     if (s.event.type === 'messageReactionAdd' || s.event.type === 'messageReactionRemove') { needsReactions = true; needsMessages = true; }
     if (s.event.type === 'voiceChannelJoin' || s.event.type === 'voiceChannelLeave') needsVoice = true;
     if (['guildMemberAdd', 'guildMemberRemove'].indexOf(s.event.type) !== -1) needsGuildMembers = true;
-    s.blocks.forEach(function (b) {
-      if (MEMBER_ACTION_TYPES.indexOf(b.type) !== -1) needsGuildMembers = true;
-      if (b.type === 'askReply') needsMessages = true;
-    });
+    s.blocks.forEach(function (b) { if (MEMBER_ACTION_TYPES.indexOf(b.type) !== -1) needsGuildMembers = true; });
   });
   if (needsMessages) { intents.add('GatewayIntentBits.GuildMessages'); intents.add('GatewayIntentBits.MessageContent'); partialsNeeded.add('Partials.Message'); }
   if (needsReactions) {
@@ -1835,21 +1409,6 @@ const TEMPLATES = [
       }];
     },
   },
-  {
-    id: 'namechange', name: 'Nickname via Reply', icon: 'reply',
-    desc: 'Adds a /namechange command: the bot asks for a new nickname, you reply, it sets it.',
-    variables: [{ name: 'newNickname', value: '' }],
-    build: function () {
-      return [{
-        id: genId('s'), event: { type: 'slashCommand', config: { commandName: 'namechange', description: 'Change your nickname by replying', opt1Name: '', opt2Name: '' } },
-        blocks: [
-          { id: genId('a'), type: 'askReply', config: { target: 'reply', text: 'Reply to this message with your new nickname!', varName: 'newNickname', timeoutSeconds: 60 } },
-          { id: genId('a'), type: 'setNickname', config: { nickname: '{{var:newNickname}}', targetWho: 'invoker' } },
-          { id: genId('a'), type: 'sendMessage', config: { target: 'same', text: 'Done! Your nickname is now {{var:newNickname}}.' } },
-        ],
-      }];
-    },
-  },
 ];
 
 /* ============================================================
@@ -1865,18 +1424,10 @@ const state = {
   eventPickerOpen: false,
   varsOpen: false,
   clientId: '',
-  simLog: [],
-  simVars: {},
-  simUser: { name: 'Alex', roles: ['Member'], nickname: null },
-  simChannel: 'general',
-  simSlashCommand: '',
-  simSlashOptionVals: {},
-  simPending: null,
 };
 
 const TABS = [
   { id: 'build', label: 'Build', icon: 'wand' },
-  { id: 'preview', label: 'Preview', icon: 'play' },
   { id: 'code', label: 'Code', icon: 'code' },
   { id: 'files', label: 'Files', icon: 'file-text' },
   { id: 'setup', label: 'Setup', icon: 'rocket' },
@@ -2124,129 +1675,6 @@ function buildTabHTML() {
     selectedHTML;
 }
 
-function simEntryHTML(entry) {
-  if (entry.deleted) {
-    return '<div class="sim-deleted">' + icon('trash', 12, 'var(--text-dim)') + '<span>message deleted</span></div>';
-  }
-  const reactionsHTML = entry.reactions && entry.reactions.length
-    ? '<div class="sim-reactions">' + entry.reactions.map(function (r) { return '<span class="sim-reaction-badge">' + esc(r) + '</span>'; }).join('') + '</div>'
-    : '';
-  const pinHTML = entry.pinned ? '<span title="Pinned message">' + icon('pin', 11, 'var(--yellow)') + '</span>' : '';
-  const displayName = state.simUser.nickname || state.simUser.name;
-
-  if (entry.type === 'user-message' || entry.type === 'user-slash') {
-    return '<div class="sim-msg">' +
-      '<div class="sim-avatar sim-avatar-user">' + esc(displayName.slice(0, 1).toUpperCase()) + '</div>' +
-      '<div class="sim-msg-body"><div class="sim-msg-head"><span class="sim-msg-name">' + esc(displayName) + '</span>' + pinHTML + '</div>' +
-      '<div class="sim-msg-text">' + esc(entry.text || '') + '</div>' + reactionsHTML + '</div></div>';
-  }
-  const noteHTML = entry.channelNote ? '<span class="sim-channel-note">#' + esc(entry.channelNote) + '</span>' : '';
-  if (entry.type === 'bot-message') {
-    return '<div class="sim-msg">' +
-      '<div class="preview-avatar" style="width:32px;height:32px">' + icon('bot', 16, '#fff') + '</div>' +
-      '<div class="sim-msg-body"><div class="sim-msg-head"><span class="sim-msg-name">Your Bot</span><span class="preview-app-badge">APP</span>' + noteHTML + pinHTML + '</div>' +
-      '<div class="sim-msg-text">' + esc(entry.text || '') + '</div>' + reactionsHTML + '</div></div>';
-  }
-  if (entry.type === 'bot-embed') {
-    const title = entry.title ? '<p class="preview-embed-title">' + esc(entry.title) + '</p>' : '';
-    const desc = entry.description ? '<p class="preview-embed-desc">' + esc(entry.description) + '</p>' : '';
-    const img = entry.imageUrl ? '<div class="preview-embed-image">image preview</div>' : '';
-    const footer = entry.footer ? '<p class="preview-embed-footer">' + esc(entry.footer) + '</p>' : '';
-    return '<div class="sim-msg">' +
-      '<div class="preview-avatar" style="width:32px;height:32px">' + icon('bot', 16, '#fff') + '</div>' +
-      '<div class="sim-msg-body"><div class="sim-msg-head"><span class="sim-msg-name">Your Bot</span><span class="preview-app-badge">APP</span>' + noteHTML + pinHTML + '</div>' +
-      '<div class="preview-embed-box" style="border-left-color:' + (entry.color || '#5865F2') + '">' + title + desc + img + footer + '</div>' + reactionsHTML + '</div></div>';
-  }
-  if (entry.type === 'bot-buttons') {
-    const styleColors = { primary: '#5865F2', secondary: '#4e5058', success: '#23a559', danger: '#da373c' };
-    const btnsHTML = (entry.buttons || []).map(function (b) {
-      return '<button class="sim-button-chip" data-act="sim-click-button" data-id="' + esc(b.id) + '" style="background:' + (styleColors[b.style] || styleColors.primary) + '">' + esc(b.label) + '</button>';
-    }).join('');
-    return '<div class="sim-msg">' +
-      '<div class="preview-avatar" style="width:32px;height:32px">' + icon('bot', 16, '#fff') + '</div>' +
-      '<div class="sim-msg-body"><div class="sim-msg-head"><span class="sim-msg-name">Your Bot</span><span class="preview-app-badge">APP</span>' + noteHTML + pinHTML + '</div>' +
-      '<div class="sim-msg-text">' + esc(entry.text || '') + '</div>' +
-      '<div class="sim-btn-row">' + btnsHTML + '</div>' + reactionsHTML + '</div></div>';
-  }
-  if (entry.type === 'console') {
-    return '<div class="sim-console">' + icon('terminal', 11, 'var(--text-dim)') + '<span>' + esc(entry.text) + '</span></div>';
-  }
-  return '<div class="sim-system">' + esc(entry.text) + '</div>';
-}
-
-function previewTabHTML() {
-  const logHTML = state.simLog.length
-    ? state.simLog.map(simEntryHTML).join('')
-    : '<div class="empty-state">Send a message or simulate an event below to see your bot respond.</div>';
-
-  const slashScripts = state.scripts.filter(function (s) { return s.event.type === 'slashCommand' && s.event.config.commandName; });
-  let slashSectionHTML = '';
-  if (slashScripts.length) {
-    if (!state.simSlashCommand || !slashScripts.some(function (s) { return s.event.config.commandName === state.simSlashCommand; })) {
-      state.simSlashCommand = slashScripts[0].event.config.commandName;
-    }
-    const activeScript = slashScripts.filter(function (s) { return s.event.config.commandName === state.simSlashCommand; })[0];
-    const optionsHTML = ['opt1', 'opt2'].map(function (k) {
-      const optName = activeScript.event.config[k + 'Name'];
-      if (!optName) return '';
-      return '<input class="field-input" style="margin-top:6px" placeholder="' + esc(optName) + '" data-sim-opt="' + esc(optName) + '" value="' + esc(state.simSlashOptionVals[optName] || '') + '" />';
-    }).join('');
-    slashSectionHTML =
-      '<div class="category-label">Test a slash command</div>' +
-      '<select class="field-input" id="sim-slash-select">' +
-      slashScripts.map(function (s) {
-        const n = s.event.config.commandName;
-        return '<option value="' + esc(n) + '" ' + (n === state.simSlashCommand ? 'selected' : '') + '>/' + esc(n) + '</option>';
-      }).join('') +
-      '</select>' + optionsHTML +
-      '<button class="btn btn-primary btn-block" style="margin-top:8px" data-act="sim-run-slash">' + icon('play', 14) + ' Run Command</button>';
-  }
-
-  const varsSummary = Object.keys(state.simVars).length
-    ? Object.keys(state.simVars).map(function (k) { return esc(k) + ' = ' + esc(JSON.stringify(state.simVars[k])); }).join(', ')
-    : '<span style="color:var(--text-dim)">none yet</span>';
-
-  const pendingBannerHTML = state.simPending
-    ? '<div class="sim-pending-banner">' + icon('reply', 13, 'var(--blurple)') +
-      '<span>Your next message replies to the bot\'s question above</span>' +
-      '<button class="icon-btn" data-act="sim-cancel-pending" aria-label="Cancel">' + icon('x', 14) + '</button></div>'
-    : '';
-
-  return '<div class="sim-chat" id="sim-chat-log">' + logHTML + '</div>' +
-    pendingBannerHTML +
-    '<div class="sim-input-row">' +
-    '<input type="text" class="field-input" id="sim-message-input" placeholder="' + (state.simPending ? 'Type your reply…' : 'Type a message…') + '" />' +
-    '<button class="btn btn-primary" data-act="sim-send">' + (state.simPending ? 'Reply' : 'Send') + '</button>' +
-    '</div>' +
-
-    '<div class="sim-section"><div class="category-label">Simulate an event</div>' +
-    '<div class="sim-btn-grid">' +
-    '<button class="btn btn-secondary btn-sm" data-act="sim-member-join">' + icon('user-plus', 13) + ' Member Joins</button>' +
-    '<button class="btn btn-secondary btn-sm" data-act="sim-member-leave">' + icon('user-minus', 13) + ' Member Leaves</button>' +
-    '<button class="btn btn-secondary btn-sm" data-act="sim-bot-ready">' + icon('zap', 13) + ' Restart Bot</button>' +
-    '<button class="btn btn-secondary btn-sm" data-act="sim-delete-last">' + icon('trash', 13) + ' Delete My Last Msg</button>' +
-    '</div>' +
-    '<div class="sim-row-inline">' +
-    '<input type="text" class="field-input" id="sim-voice-channel" value="General" placeholder="Voice channel" />' +
-    '<button class="btn btn-secondary btn-sm" data-act="sim-voice-join">Join Voice</button>' +
-    '<button class="btn btn-secondary btn-sm" data-act="sim-voice-leave">Leave Voice</button>' +
-    '</div>' +
-    '<div class="sim-row-inline">' +
-    '<input type="text" class="field-input" id="sim-reaction-emoji" value="👍" placeholder="Emoji" />' +
-    '<button class="btn btn-secondary btn-sm" data-act="sim-react">React to Last</button>' +
-    '<button class="btn btn-secondary btn-sm" data-act="sim-unreact">Un-React</button>' +
-    '</div></div>' +
-
-    (slashSectionHTML ? '<div class="sim-section">' + slashSectionHTML + '</div>' : '') +
-
-    '<div class="sim-section sim-debug"><div class="category-label">Live State</div>' +
-    '<div class="sim-debug-row"><b>Name:</b> ' + esc(state.simUser.nickname || state.simUser.name) + (state.simUser.nickname ? ' <span style="color:var(--text-dim)">(nickname)</span>' : '') + '</div>' +
-    '<div class="sim-debug-row"><b>Roles:</b> ' + (state.simUser.roles.length ? state.simUser.roles.map(function (r) { return esc(r); }).join(', ') : '<span style="color:var(--text-dim)">none</span>') + '</div>' +
-    '<div class="sim-debug-row"><b>Variables:</b> ' + varsSummary + '</div></div>' +
-
-    '<button class="btn btn-dashed btn-block" style="margin-top:10px" data-act="sim-reset">' + icon('x', 14) + ' Reset conversation</button>';
-}
-
 function codeTabHTML() {
   const code = generateFullCode(state.scripts, state.variables, state.botName);
   const warnings = [];
@@ -2293,7 +1721,7 @@ function inviteAreaHTML(permInfo) {
 }
 
 function setupTabHTML() {
-  const needsMessageContent = state.scripts.some(function (s) { return s.event.type === 'messageCreate' || s.blocks.some(function (b) { return b.type === 'askReply'; }); });
+  const needsMessageContent = state.scripts.some(function (s) { return s.event.type === 'messageCreate'; });
   const needsMembers = state.scripts.some(function (s) { return ['guildMemberAdd', 'guildMemberRemove'].indexOf(s.event.type) !== -1; }) ||
     state.scripts.some(function (s) { return s.blocks.some(function (b) { return ['addRole', 'removeRole', 'kickMember', 'banMember', 'timeoutMember', 'setNickname'].indexOf(b.type) !== -1; }); });
   const permInfo = computePermissions(state.scripts);
@@ -2445,7 +1873,6 @@ function render() {
   const app = document.getElementById('app');
   let bodyHTML = '';
   if (state.activeTab === 'build') bodyHTML = buildTabHTML();
-  else if (state.activeTab === 'preview') bodyHTML = previewTabHTML();
   else if (state.activeTab === 'code') bodyHTML = codeTabHTML();
   else if (state.activeTab === 'files') bodyHTML = filesTabHTML();
   else if (state.activeTab === 'setup') bodyHTML = setupTabHTML();
@@ -2573,11 +2000,6 @@ function matchesField(el) {
 /* ============================================================
    EVENT WIRING
    ============================================================ */
-function scrollSimToBottom() {
-  const log = document.getElementById('sim-chat-log');
-  if (log) log.scrollTop = log.scrollHeight;
-}
-
 function initEvents() {
   const app = document.getElementById('app');
 
@@ -2605,62 +2027,14 @@ function initEvents() {
     else if (act === 'delete-var') { deleteVariable(btn.dataset.id); render(); }
     else if (act === 'copy') { handleCopy(btn); }
     else if (act === 'download') { handleDownload(btn); }
-    else if (act === 'sim-send') {
-      const input = document.getElementById('sim-message-input');
-      simSendMessage(input ? input.value : '');
-      render(); scrollSimToBottom();
-    }
-    else if (act === 'sim-member-join') { simMemberJoin(); render(); scrollSimToBottom(); }
-    else if (act === 'sim-member-leave') { simMemberLeave(); render(); scrollSimToBottom(); }
-    else if (act === 'sim-bot-ready') { simBotReady(); render(); scrollSimToBottom(); }
-    else if (act === 'sim-delete-last') { simDeleteLast(); render(); scrollSimToBottom(); }
-    else if (act === 'sim-voice-join') {
-      const input = document.getElementById('sim-voice-channel');
-      simVoiceJoin(input ? input.value : 'General');
-      render(); scrollSimToBottom();
-    }
-    else if (act === 'sim-voice-leave') {
-      const input = document.getElementById('sim-voice-channel');
-      simVoiceLeave(input ? input.value : 'General');
-      render(); scrollSimToBottom();
-    }
-    else if (act === 'sim-react') {
-      const input = document.getElementById('sim-reaction-emoji');
-      simReactLast(input ? input.value : '👍', false);
-      render(); scrollSimToBottom();
-    }
-    else if (act === 'sim-unreact') {
-      const input = document.getElementById('sim-reaction-emoji');
-      simReactLast(input ? input.value : '👍', true);
-      render(); scrollSimToBottom();
-    }
-    else if (act === 'sim-click-button') { simClickButton(btn.dataset.id); render(); scrollSimToBottom(); }
-    else if (act === 'sim-run-slash') {
-      const opts = {};
-      document.querySelectorAll('[data-sim-opt]').forEach(function (el) { opts[el.dataset.simOpt] = el.value; });
-      state.simSlashOptionVals = opts;
-      simRunSlashCommand(state.simSlashCommand, opts);
-      render(); scrollSimToBottom();
-    }
-    else if (act === 'sim-reset') { simReset(); render(); }
-    else if (act === 'sim-cancel-pending') { simCancelPending(); render(); scrollSimToBottom(); }
   });
 
   app.addEventListener('input', function (e) {
     if (matchesField(e.target)) applyFieldChange(e.target);
-    if (e.target.hasAttribute('data-sim-opt')) state.simSlashOptionVals[e.target.dataset.simOpt] = e.target.value;
   });
 
   app.addEventListener('change', function (e) {
     if (matchesField(e.target)) { applyFieldChange(e.target); render(); }
-    if (e.target.id === 'sim-slash-select') { state.simSlashCommand = e.target.value; state.simSlashOptionVals = {}; render(); }
-  });
-
-  app.addEventListener('keydown', function (e) {
-    if (e.key === 'Enter' && e.target.id === 'sim-message-input') {
-      simSendMessage(e.target.value);
-      render(); scrollSimToBottom();
-    }
   });
 
   document.addEventListener('keydown', function (e) {
